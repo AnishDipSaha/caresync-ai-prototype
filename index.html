@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CareSync AI — Hospital Care Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #EFF2EF;
+    --surface: #FFFFFF;
+    --ink: #17242B;
+    --ink-muted: #5B6B70;
+    --border: #D8DDD9;
+    --accent: #2B6E63;
+    --accent-soft: #E3ECE9;
+    --critical: #B23A32;
+    --critical-soft: #F6E6E4;
+    --watch: #B8811F;
+    --watch-soft: #F5EDDB;
+    --stable: #2E7D5B;
+    --stable-soft: #E4EFE8;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3 { font-family: 'Newsreader', serif; font-weight: 500; margin: 0; }
+
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+
+  header.app-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px 0;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    max-width: 1100px;
+    margin: 0 auto 18px;
+  }
+
+  .brand h1 { font-size: 22px; letter-spacing: -0.01em; }
+  .brand .tagline { color: var(--ink-muted); font-size: 13px; margin-top: 2px; }
+
+  .role-switch {
+    font-size: 13px;
+    color: var(--ink-muted);
+  }
+  .role-switch select {
+    font-family: 'Inter', sans-serif;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--ink);
+    padding: 6px 10px;
+    border-radius: 3px;
+    margin-left: 8px;
+  }
+
+  nav.tabs {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    gap: 4px;
+  }
+
+  nav.tabs button {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    background: none;
+    border: none;
+    padding: 10px 16px;
+    color: var(--ink-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s ease;
+  }
+
+  nav.tabs button.active {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+    font-weight: 500;
+  }
+
+  nav.tabs button:hover:not(.active) { color: var(--ink); }
+
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px;
+  }
+
+  .view-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .view-heading h2 { font-size: 20px; }
+  .view-heading .subtext { color: var(--ink-muted); font-size: 13px; }
+
+  table.patient-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  table.patient-table th {
+    text-align: left;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-muted);
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  table.patient-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    vertical-align: middle;
+  }
+
+  table.patient-table tr:last-child td { border-bottom: none; }
+  table.patient-table tr:hover { background: var(--bg); }
+
+  .status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  .status-stable .status-dot { background: var(--stable); }
+  .status-watch .status-dot { background: var(--watch); }
+  .status-critical .status-dot { background: var(--critical); }
+
+  .status-label { font-size: 13px; }
+  .status-stable .status-label { color: var(--stable); }
+  .status-watch .status-label { color: var(--watch); }
+  .status-critical .status-label { color: var(--critical); }
+
+  .vitals-inline {
+    display: flex;
+    gap: 14px;
+    font-size: 13px;
+  }
+  .vitals-inline span { color: var(--ink-muted); }
+  .vitals-inline b { color: var(--ink); font-weight: 500; }
+
+  .placeholder {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 48px 32px;
+    text-align: center;
+    color: var(--ink-muted);
+  }
+  .placeholder h3 { color: var(--ink); font-size: 17px; margin-bottom: 8px; }
+  .placeholder p { font-size: 14px; max-width: 420px; margin: 0 auto; line-height: 1.6; }
+
+  footer {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 32px 32px;
+    color: var(--ink-muted);
+    font-size: 12px;
+    line-height: 1.6;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-top">
+    <div class="brand">
+      <h1>CareSync AI</h1>
+      <div class="tagline">One patient. One connected care system.</div>
+    </div>
+    <div class="role-switch">
+      Viewing as
+      <select id="roleSelect">
+        <option value="nurse">Nurse</option>
+        <option value="doctor">Doctor</option>
+        <option value="pharmacy">Pharmacy</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs"></nav>
+</header>
+
+<main id="main"></main>
+
+<footer>
+  Day 1 prototype build — patient and vitals data shown here is simulated for demonstration purposes only. AI features in later builds are intended as clinical decision-support, not autonomous diagnosis or prescription.
+</footer>
+
+<script>
+  // ---- Mock patient data (Day 1 data model) ----
+  const patients = [
+    {
+      id: "CS-10245", name: "R. Sharma", age: 58, bed: "ICU-03", department: "Cardiology",
+      assignedDoctor: "Dr. Iyer", assignedNurse: "Nurse Fernandes",
+      vitals: { spo2: 89, heartRate: 108, bp: "152/96", temp: 38.2, glucose: 178, respRate: 22 },
+      status: "critical"
+    },
+    {
+      id: "CS-10246", name: "A. Bose", age: 34, bed: "Ward-12", department: "General Medicine",
+      assignedDoctor: "Dr. Menon", assignedNurse: "Nurse Fernandes",
+      vitals: { spo2: 97, heartRate: 78, bp: "118/76", temp: 37.0, glucose: 96, respRate: 16 },
+      status: "stable"
+    },
+    {
+      id: "CS-10247", name: "K. Verma", age: 71, bed: "Ward-15", department: "Pulmonology",
+      assignedDoctor: "Dr. Iyer", assignedNurse: "Nurse Ali",
+      vitals: { spo2: 93, heartRate: 96, bp: "138/88", temp: 37.6, glucose: 142, respRate: 20 },
+      status: "watch"
+    },
+    {
+      id: "CS-10248", name: "S. Nair", age: 45, bed: "Ward-08", department: "Orthopedics",
+      assignedDoctor: "Dr. Menon", assignedNurse: "Nurse Ali",
+      vitals: { spo2: 98, heartRate: 72, bp: "122/80", temp: 36.9, glucose: 101, respRate: 15 },
+      status: "stable"
+    },
+    {
+      id: "CS-10249", name: "P. Das", age: 62, bed: "ICU-01", department: "Cardiology",
+      assignedDoctor: "Dr. Iyer", assignedNurse: "Nurse Fernandes",
+      vitals: { spo2: 94, heartRate: 101, bp: "145/90", temp: 37.9, glucose: 165, respRate: 19 },
+      status: "watch"
+    },
+    {
+      id: "CS-10250", name: "M. Reddy", age: 29, bed: "Ward-20", department: "General Medicine",
+      assignedDoctor: "Dr. Menon", assignedNurse: "Nurse Ali",
+      vitals: { spo2: 99, heartRate: 68, bp: "114/74", temp: 36.7, glucose: 92, respRate: 14 },
+      status: "stable"
+    }
+  ];
+
+  const statusLabels = { stable: "Stable", watch: "Watch", critical: "Alert" };
+
+  const tabsByRole = {
+    nurse: [{ id: "nurse", label: "My Patients" }],
+    doctor: [{ id: "doctor", label: "My Patients" }],
+    pharmacy: [{ id: "pharmacy", label: "Pharmacy" }],
+    admin: [{ id: "admin", label: "Overview" }]
+  };
+
+  let currentRole = "nurse";
+
+  function renderTabs() {
+    const tabs = tabsByRole[currentRole];
+    document.getElementById("tabs").innerHTML = tabs
+      .map((t, i) => `<button class="${i === 0 ? "active" : ""}" data-tab="${t.id}">${t.label}</button>`)
+      .join("");
+  }
+
+  function patientTable(role) {
+    const rows = patients.map(p => `
+      <tr>
+        <td class="mono">${p.id}</td>
+        <td>${p.name}</td>
+        <td>${p.bed}</td>
+        <td>${p.department}</td>
+        <td>
+          <div class="vitals-inline">
+            <span>SpO2 <b>${p.vitals.spo2}%</b></span>
+            <span>HR <b>${p.vitals.heartRate}</b></span>
+            <span>BP <b>${p.vitals.bp}</b></span>
+          </div>
+        </td>
+        <td class="status-${p.status}">
+          <span class="status-dot"></span><span class="status-label">${statusLabels[p.status]}</span>
+        </td>
+      </tr>
+    `).join("");
+
+    return `
+      <div class="view-heading">
+        <h2>${role === "nurse" ? "Assigned Patients" : "My Patients"}</h2>
+        <div class="subtext">${patients.length} patients · updated just now</div>
+      </div>
+      <table class="patient-table">
+        <thead>
+          <tr>
+            <th>Patient ID</th><th>Name</th><th>Bed</th><th>Department</th><th>Current Vitals</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  function placeholder(title, body) {
+    return `<div class="placeholder"><h3>${title}</h3><p>${body}</p></div>`;
+  }
+
+  function renderMain() {
+    const main = document.getElementById("main");
+    if (currentRole === "nurse" || currentRole === "doctor") {
+      main.innerHTML = patientTable(currentRole);
+    } else if (currentRole === "pharmacy") {
+      main.innerHTML = placeholder("Pharmacy portal", "Stock levels, prescription requests, and partner pharmacy availability arrive on Day 7 of the build.");
+    } else if (currentRole === "admin") {
+      main.innerHTML = placeholder("Admin overview", "Bed occupancy, alert response time, and operational metrics arrive on Day 9 of the build.");
+    }
+  }
+
+  document.getElementById("roleSelect").addEventListener("change", (e) => {
+    currentRole = e.target.value;
+    renderTabs();
+    renderMain();
+  });
+
+  renderTabs();
+  renderMain();
+</script>
+
+</body>
+</html>
