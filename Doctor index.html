@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CareSync AI — Hospital Care Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #EFF2EF;
+    --surface: #FFFFFF;
+    --ink: #17242B;
+    --ink-muted: #5B6B70;
+    --border: #D8DDD9;
+    --accent: #2B6E63;
+    --accent-soft: #E3ECE9;
+    --critical: #B23A32;
+    --critical-soft: #F6E6E4;
+    --watch: #B8811F;
+    --watch-soft: #F5EDDB;
+    --stable: #2E7D5B;
+    --stable-soft: #E4EFE8;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3 { font-family: 'Newsreader', serif; font-weight: 500; margin: 0; }
+
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+
+  header.app-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    max-width: 1100px;
+    margin: 0 auto 18px;
+  }
+
+  .brand h1 { font-size: 22px; letter-spacing: -0.01em; }
+  .brand .tagline { color: var(--ink-muted); font-size: 13px; margin-top: 2px; }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .role-switch { font-size: 13px; color: var(--ink-muted); }
+  .role-switch select {
+    font-family: 'Inter', sans-serif;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--ink);
+    padding: 6px 10px;
+    border-radius: 3px;
+    margin-left: 8px;
+  }
+
+  .sim-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--ink-muted);
+  }
+  .sim-toggle .switch {
+    width: 34px;
+    height: 18px;
+    border-radius: 10px;
+    background: var(--border);
+    position: relative;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .sim-toggle .switch.on { background: var(--accent); }
+  .sim-toggle .switch::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--surface);
+    transition: left 0.15s ease;
+  }
+  .sim-toggle .switch.on::after { left: 18px; }
+  .sim-toggle.live { color: var(--accent); font-weight: 500; }
+  .pulse-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+    animation: pulse 1.4s infinite ease-in-out;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.25;} }
+
+  nav.tabs { max-width: 1100px; margin: 0 auto; display: flex; gap: 4px; }
+  nav.tabs button {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    background: none;
+    border: none;
+    padding: 10px 16px;
+    color: var(--ink-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s ease;
+  }
+  nav.tabs button.active { color: var(--ink); border-bottom-color: var(--accent); font-weight: 500; }
+  nav.tabs button:hover:not(.active) { color: var(--ink); }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 32px; }
+
+  .view-heading { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; }
+  .view-heading h2 { font-size: 20px; }
+  .view-heading .subtext { color: var(--ink-muted); font-size: 13px; }
+
+  table.patient-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); }
+  table.patient-table th {
+    text-align: left; font-size: 12px; font-weight: 500; color: var(--ink-muted);
+    padding: 10px 16px; border-bottom: 1px solid var(--border);
+  }
+  table.patient-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: middle; }
+  table.patient-table tr:last-child td { border-bottom: none; }
+  table.patient-table tr.patient-row { cursor: pointer; }
+  table.patient-table tr.patient-row:hover { background: var(--bg); }
+  table.patient-table tr.selected { background: var(--accent-soft); }
+
+  .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+  .status-stable .status-dot { background: var(--stable); }
+  .status-watch .status-dot { background: var(--watch); }
+  .status-critical .status-dot { background: var(--critical); }
+  .status-label { font-size: 13px; }
+  .status-stable .status-label { color: var(--stable); }
+  .status-watch .status-label { color: var(--watch); }
+  .status-critical .status-label { color: var(--critical); }
+
+  .vitals-inline { display: flex; gap: 14px; font-size: 13px; }
+  .vitals-inline span { color: var(--ink-muted); }
+  .vitals-inline b { color: var(--ink); font-weight: 500; }
+
+  .placeholder {
+    background: var(--surface); border: 1px solid var(--border); padding: 48px 32px; text-align: center; color: var(--ink-muted);
+  }
+  .placeholder h3 { color: var(--ink); font-size: 17px; margin-bottom: 8px; }
+  .placeholder p { font-size: 14px; max-width: 420px; margin: 0 auto; line-height: 1.6; }
+
+  /* Detail panel */
+  .detail-panel {
+    margin-top: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+  .detail-header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+  }
+  .detail-header h3 { font-size: 17px; }
+  .detail-header .meta { font-size: 12px; color: var(--ink-muted); margin-top: 3px; }
+  .close-btn {
+    border: none; background: none; color: var(--ink-muted); cursor: pointer; font-size: 13px;
+  }
+  .close-btn:hover { color: var(--ink); }
+
+  .detail-body { display: grid; grid-template-columns: 1.1fr 1fr; gap: 0; }
+  .detail-col { padding: 20px; }
+  .detail-col + .detail-col { border-left: 1px solid var(--border); }
+
+  .vitals-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;
+  }
+  .vital-box {
+    border: 1px solid var(--border); padding: 10px 12px; background: var(--bg);
+  }
+  .vital-box .label { font-size: 11px; color: var(--ink-muted); text-transform: none; }
+  .vital-box .value { font-size: 18px; font-weight: 500; margin-top: 2px; }
+  .vital-box.flag-critical { border-color: var(--critical); background: var(--critical-soft); }
+  .vital-box.flag-watch { border-color: var(--watch); background: var(--watch-soft); }
+
+  h4.section-label { font-size: 13px; font-weight: 500; color: var(--ink-muted); margin: 0 0 10px; }
+
+  form.vitals-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+  form.vitals-form label { font-size: 12px; color: var(--ink-muted); display: block; margin-bottom: 4px; }
+  form.vitals-form input {
+    width: 100%; font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+    padding: 7px 9px; border: 1px solid var(--border); border-radius: 2px; background: var(--surface); color: var(--ink);
+  }
+  form.vitals-form input:focus { outline: none; border-color: var(--accent); }
+  .form-actions { grid-column: 1 / -1; margin-top: 4px; }
+
+  button.primary-btn {
+    background: var(--accent); color: #fff; border: none; padding: 8px 16px;
+    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 2px;
+  }
+  button.primary-btn:hover { background: #235a51; }
+  button.secondary-btn {
+    background: none; color: var(--accent); border: 1px solid var(--accent); padding: 6px 12px;
+    font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; border-radius: 2px;
+  }
+  button.secondary-btn:hover { background: var(--accent-soft); }
+  button.secondary-btn:disabled {
+    border-color: var(--border); color: var(--ink-muted); cursor: default; background: none;
+  }
+
+  .med-list { display: flex; flex-direction: column; gap: 8px; }
+  .med-item {
+    display: flex; align-items: center; justify-content: space-between;
+    border: 1px solid var(--border); padding: 10px 12px; font-size: 13px;
+  }
+  .med-item .med-name { font-weight: 500; }
+  .med-item .med-meta { color: var(--ink-muted); font-size: 12px; margin-top: 2px; }
+  .med-item.administered { opacity: 0.55; }
+  .tag-administered {
+    font-size: 11px; color: var(--stable); background: var(--stable-soft); padding: 2px 8px; border-radius: 10px;
+  }
+
+  .history-log { margin-top: 16px; font-size: 12px; color: var(--ink-muted); }
+  .history-log .entry { padding: 4px 0; border-bottom: 1px dashed var(--border); }
+
+  footer {
+    max-width: 1100px; margin: 0 auto; padding: 0 32px 32px; color: var(--ink-muted); font-size: 12px;
+    line-height: 1.6; border-top: 1px solid var(--border); padding-top: 16px;
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-top">
+    <div class="brand">
+      <h1>CareSync AI</h1>
+      <div class="tagline">One patient. One connected care system.</div>
+    </div>
+    <div class="header-right">
+      <div class="sim-toggle" id="simToggleWrap">
+        <span id="simLabel">Simulate live vitals</span>
+        <div class="switch" id="simSwitch"></div>
+      </div>
+      <div class="role-switch">
+        Viewing as
+        <select id="roleSelect">
+          <option value="nurse">Nurse</option>
+          <option value="doctor">Doctor</option>
+          <option value="pharmacy">Pharmacy</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs"></nav>
+</header>
+
+<main id="main"></main>
+
+<footer>
+  Vitals shown here are simulated for demonstration purposes only. AI features in later builds are intended as clinical decision-support, not autonomous diagnosis or prescription.
+</footer>
+
+<script>
+  // ---- Data model ----
+  const patients = [
+    {
+      id: "CS-10245", name: "R. Sharma", age: 58, bed: "ICU-03", department: "Cardiology",
+      assignedDoctor: "Dr. Iyer", assignedNurse: "Nurse Fernandes", trend: "worsening",
+      vitals: { spo2: 89, heartRate: 108, systolic: 152, diastolic: 96, temp: 38.2, glucose: 178, respRate: 22 },
+      history: [],
+      prescriptions: [
+        { id: "rx1", medicine: "Furosemide 20mg", dose: "20mg", timing: "8:00 AM", status: "pending" },
+        { id: "rx2", medicine: "Metoprolol 25mg", dose: "25mg", timing: "8:00 AM", status: "administered", administeredAt: "8:04 AM" }
+      ]
+    },
+    {
+      id: "CS-10246", name: "A. Bose", age: 34, bed: "Ward-12", department: "General Medicine",
+      assignedDoctor: "Dr. Menon", assignedNurse: "Nurse Fernandes", trend: "stable",
+      vitals: { spo2: 97, heartRate: 78, systolic: 118, diastolic: 76, temp: 37.0, glucose: 96, respRate: 16 },
+      history: [],
+      prescriptions: [
+        { id: "rx3", medicine: "Paracetamol 650mg", dose: "650mg", timing: "2:00 PM", status: "pending" }
+      ]
+    },
+    {
+      id: "CS-10247", name: "K. Verma", age: 71, bed: "Ward-15", department: "Pulmonology",
+      assignedDoctor: "Dr. Iyer", assignedNurse: "Nurse Ali", trend: "slow-worsening",
+      vitals: { spo2: 93, heartRate: 96, systolic: 138, diastolic: 88, temp: 37.6, glucose: 142, respRate: 20 },
+      history: [],
+      prescriptions: [
+        { id: "rx4", medicine: "Salbutamol Inhaler", dose: "2 puffs", timing: "12:00 PM", status: "pending" },
+        { id: "rx5", medicine: "Azithromycin 500mg", dose: "500mg", timing: "9:00 AM", status: "administered", administeredAt: "9:10 AM" }
+      ]
+    },
+    {
+      id: "CS-10248", name: "S. Nair", age: 45, bed: "Ward-08", department: "Orthopedics",
+      assignedDoctor: "Dr. Menon", assignedNurse: "Nurse Ali", trend: "stable",
+      vitals: { spo2: 98, heartRate: 72, systolic: 122, diastolic: 80, temp: 36.9, glucose: 101, respRate: 15 },
+      history: [],
+      prescriptions: [
+        { id: "rx6", medicine: "Ibuprofen 400mg", dose: "400mg", timing: "1:00 PM", status: "pending" }
+      ]
+    },
+    {
+      id: "CS-10249", name: "P. Das", age: 62, bed: "ICU-01", department: "Cardiology",
+      assignedDoctor: "Dr. Iyer", assignedNurse: "Nurse Fernandes", trend: "slow-worsening",
+      vitals: { spo2: 94, heartRate: 101, systolic: 145, diastolic: 90, temp: 37.9, glucose: 165, respRate: 19 },
+      history: [],
+      prescriptions: [
+        { id: "rx7", medicine: "Atorvastatin 20mg", dose: "20mg", timing: "9:00 PM", status: "pending" }
+      ]
+    },
+    {
+      id: "CS-10250", name: "M. Reddy", age: 29, bed: "Ward-20", department: "General Medicine",
+      assignedDoctor: "Dr. Menon", assignedNurse: "Nurse Ali", trend: "stable",
+      vitals: { spo2: 99, heartRate: 68, systolic: 114, diastolic: 74, temp: 36.7, glucose: 92, respRate: 14 },
+      history: [],
+      prescriptions: []
+    }
+  ];
+
+  const statusLabels = { stable: "Stable", watch: "Watch", critical: "Alert" };
+
+  const tabsByRole = {
+    nurse: [{ id: "nurse", label: "My Patients" }],
+    doctor: [{ id: "doctor", label: "My Patients" }],
+    pharmacy: [{ id: "pharmacy", label: "Pharmacy" }],
+    admin: [{ id: "admin", label: "Overview" }]
+  };
+
+  let currentRole = "nurse";
+  let selectedPatientId = null;
+  let simulateOn = false;
+  let simInterval = null;
+
+  function nowTime() {
+    return new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+
+  function computeStatus(v) {
+    if (v.spo2 < 90 || v.heartRate > 115 || v.heartRate < 50 || v.temp > 39 || v.systolic > 160) return "critical";
+    if (v.spo2 < 94 || v.heartRate > 100 || v.temp > 37.8 || v.systolic > 145) return "watch";
+    return "stable";
+  }
+
+  function getPatient(id) { return patients.find(p => p.id === id); }
+
+  function pushHistory(p) {
+    p.history.push({ time: nowTime(), ...p.vitals });
+    if (p.history.length > 20) p.history.shift();
+  }
+
+  // initialize history with current reading
+  patients.forEach(p => { p.status = computeStatus(p.vitals); pushHistory(p); });
+
+  function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+  function nudgeVitals(p) {
+    const v = p.vitals;
+    const noise = () => (Math.random() - 0.5) * 2;
+    let drift = 0;
+    if (p.trend === "worsening") drift = 0.6;
+    else if (p.trend === "slow-worsening") drift = 0.25;
+    else drift = 0;
+
+    v.spo2 = clamp(+(v.spo2 - drift * 0.6 + noise() * 0.5).toFixed(0), 82, 100);
+    v.heartRate = clamp(Math.round(v.heartRate + drift * 1.2 + noise() * 2), 50, 145);
+    v.temp = clamp(+(v.temp + drift * 0.03 + noise() * 0.08).toFixed(1), 35.5, 40.5);
+    v.systolic = clamp(Math.round(v.systolic + drift * 0.8 + noise() * 2), 90, 180);
+    v.diastolic = clamp(Math.round(v.diastolic + noise()), 55, 110);
+    v.glucose = clamp(Math.round(v.glucose + noise() * 2), 70, 220);
+    v.respRate = clamp(Math.round(v.respRate + drift * 0.3 + noise() * 0.5), 12, 32);
+
+    p.status = computeStatus(v);
+    pushHistory(p);
+  }
+
+  function tickSimulation() {
+    patients.forEach(nudgeVitals);
+    renderMain();
+  }
+
+  function setSimulate(on) {
+    simulateOn = on;
+    document.getElementById("simSwitch").classList.toggle("on", on);
+    document.getElementById("simToggleWrap").classList.toggle("live", on);
+    document.getElementById("simLabel").innerHTML = on
+      ? '<span class="pulse-dot"></span> Live vitals streaming'
+      : 'Simulate live vitals';
+    if (on) {
+      simInterval = setInterval(tickSimulation, 4000);
+    } else {
+      clearInterval(simInterval);
+    }
+  }
+
+  function renderTabs() {
+    const tabs = tabsByRole[currentRole];
+    document.getElementById("tabs").innerHTML = tabs
+      .map((t, i) => `<button class="${i === 0 ? "active" : ""}" data-tab="${t.id}">${t.label}</button>`)
+      .join("");
+  }
+
+  function bp(v) { return `${v.systolic}/${v.diastolic}`; }
+
+  function patientTable() {
+    const rows = patients.map(p => `
+      <tr class="patient-row ${p.id === selectedPatientId ? 'selected' : ''}" data-id="${p.id}">
+        <td class="mono">${p.id}</td>
+        <td>${p.name}</td>
+        <td>${p.bed}</td>
+        <td>${p.department}</td>
+        <td>
+          <div class="vitals-inline">
+            <span>SpO2 <b>${p.vitals.spo2}%</b></span>
+            <span>HR <b>${p.vitals.heartRate}</b></span>
+            <span>BP <b>${bp(p.vitals)}</b></span>
+          </div>
+        </td>
+        <td class="status-${p.status}"><span class="status-dot"></span><span class="status-label">${statusLabels[p.status]}</span></td>
+      </tr>
+    `).join("");
+
+    return `
+      <div class="view-heading">
+        <h2>Assigned Patients</h2>
+        <div class="subtext">${patients.length} patients · click a row for details</div>
+      </div>
+      <table class="patient-table">
+        <thead><tr><th>Patient ID</th><th>Name</th><th>Bed</th><th>Department</th><th>Current Vitals</th><th>Status</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  function vitalBoxClass(key, v) {
+    if (key === "spo2") return v < 90 ? "flag-critical" : v < 94 ? "flag-watch" : "";
+    if (key === "heartRate") return (v > 115 || v < 50) ? "flag-critical" : v > 100 ? "flag-watch" : "";
+    if (key === "temp") return v > 39 ? "flag-critical" : v > 37.8 ? "flag-watch" : "";
+    return "";
+  }
+
+  function nurseDetailPanel(p) {
+    const vitalDefs = [
+      ["spo2", "SpO2", "%"], ["heartRate", "Heart Rate", "bpm"],
+      ["temp", "Temperature", "°C"], ["glucose", "Glucose", "mg/dL"], ["respRate", "Resp. Rate", "/min"]
+    ];
+    const vitalsBoxes = vitalDefs.map(([key, label, unit]) => `
+      <div class="vital-box ${vitalBoxClass(key, p.vitals[key])}">
+        <div class="label">${label}</div>
+        <div class="value">${p.vitals[key]}${unit === '%' ? '%' : ''} ${unit !== '%' ? `<span style="font-size:11px;color:var(--ink-muted);">${unit}</span>` : ''}</div>
+      </div>
+    `).join("") + `
+      <div class="vital-box">
+        <div class="label">Blood Pressure</div>
+        <div class="value">${bp(p.vitals)}</div>
+      </div>
+    `;
+
+    const medsList = p.prescriptions.length
+      ? p.prescriptions.map(rx => `
+        <div class="med-item ${rx.status === 'administered' ? 'administered' : ''}">
+          <div>
+            <div class="med-name">${rx.medicine}</div>
+            <div class="med-meta">${rx.timing}${rx.status === 'administered' ? ' · given ' + rx.administeredAt : ''}</div>
+          </div>
+          ${rx.status === 'administered'
+            ? `<span class="tag-administered">Administered</span>`
+            : `<button class="secondary-btn" data-admin="${rx.id}">Mark administered</button>`}
+        </div>
+      `).join("")
+      : `<div style="font-size:13px;color:var(--ink-muted);">No pending medications.</div>`;
+
+    const historyEntries = [...p.history].slice(-5).reverse().map(h => `
+      <div class="entry">${h.time} — SpO2 ${h.spo2}%, HR ${h.heartRate}, BP ${h.systolic}/${h.diastolic}, Temp ${h.temp}°C</div>
+    `).join("");
+
+    return `
+      <div class="detail-panel">
+        <div class="detail-header">
+          <div>
+            <h3>${p.name} <span class="mono" style="font-size:13px;color:var(--ink-muted);">${p.id}</span></h3>
+            <div class="meta">${p.bed} · ${p.department} · Assigned: ${p.assignedNurse}</div>
+          </div>
+          <button class="close-btn" id="closeDetail">Close ✕</button>
+        </div>
+        <div class="detail-body">
+          <div class="detail-col">
+            <h4 class="section-label">Current Vitals</h4>
+            <div class="vitals-grid">${vitalsBoxes}</div>
+            <h4 class="section-label">Log New Reading</h4>
+            <form class="vitals-form" id="vitalsForm">
+              <div><label>SpO2 (%)</label><input type="number" name="spo2" value="${p.vitals.spo2}"></div>
+              <div><label>Heart Rate (bpm)</label><input type="number" name="heartRate" value="${p.vitals.heartRate}"></div>
+              <div><label>BP Systolic</label><input type="number" name="systolic" value="${p.vitals.systolic}"></div>
+              <div><label>BP Diastolic</label><input type="number" name="diastolic" value="${p.vitals.diastolic}"></div>
+              <div><label>Temperature (°C)</label><input type="number" step="0.1" name="temp" value="${p.vitals.temp}"></div>
+              <div><label>Glucose (mg/dL)</label><input type="number" name="glucose" value="${p.vitals.glucose}"></div>
+              <div class="form-actions"><button type="submit" class="primary-btn">Save reading</button></div>
+            </form>
+            <div class="history-log">${historyEntries}</div>
+          </div>
+          <div class="detail-col">
+            <h4 class="section-label">Medication Tasks</h4>
+            <div class="med-list">${medsList}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function placeholder(title, body) {
+    return `<div class="placeholder"><h3>${title}</h3><p>${body}</p></div>`;
+  }
+
+  function renderMain() {
+    const main = document.getElementById("main");
+    if (currentRole === "nurse") {
+      let html = patientTable();
+      if (selectedPatientId) {
+        const p = getPatient(selectedPatientId);
+        if (p) html += nurseDetailPanel(p);
+      }
+      main.innerHTML = html;
+      attachNurseHandlers();
+    } else if (currentRole === "doctor") {
+      main.innerHTML = patientTable();
+      attachRowSelectHandlers();
+    } else if (currentRole === "pharmacy") {
+      main.innerHTML = placeholder("Pharmacy portal", "Stock levels, prescription requests, and partner pharmacy availability arrive on Day 7 of the build.");
+    } else if (currentRole === "admin") {
+      main.innerHTML = placeholder("Admin overview", "Bed occupancy, alert response time, and operational metrics arrive on Day 9 of the build.");
+    }
+  }
+
+  function attachRowSelectHandlers() {
+    document.querySelectorAll("tr.patient-row").forEach(row => {
+      row.addEventListener("click", () => {
+        selectedPatientId = row.dataset.id === selectedPatientId ? null : row.dataset.id;
+        renderMain();
+      });
+    });
+  }
+
+  function attachNurseHandlers() {
+    attachRowSelectHandlers();
+
+    const closeBtn = document.getElementById("closeDetail");
+    if (closeBtn) closeBtn.addEventListener("click", () => { selectedPatientId = null; renderMain(); });
+
+    const form = document.getElementById("vitalsForm");
+    if (form) {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const p = getPatient(selectedPatientId);
+        const fd = new FormData(form);
+        p.vitals.spo2 = clamp(+fd.get("spo2"), 60, 100);
+        p.vitals.heartRate = clamp(+fd.get("heartRate"), 30, 200);
+        p.vitals.systolic = clamp(+fd.get("systolic"), 70, 220);
+        p.vitals.diastolic = clamp(+fd.get("diastolic"), 40, 140);
+        p.vitals.temp = clamp(+fd.get("temp"), 34, 42);
+        p.vitals.glucose = clamp(+fd.get("glucose"), 40, 400);
+        p.status = computeStatus(p.vitals);
+        pushHistory(p);
+        renderMain();
+      });
+    }
+
+    document.querySelectorAll("[data-admin]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const p = getPatient(selectedPatientId);
+        const rx = p.prescriptions.find(r => r.id === btn.dataset.admin);
+        rx.status = "administered";
+        rx.administeredAt = nowTime();
+        renderMain();
+      });
+    });
+  }
+
+  document.getElementById("roleSelect").addEventListener("change", (e) => {
+    currentRole = e.target.value;
+    selectedPatientId = null;
+    renderTabs();
+    renderMain();
+  });
+
+  document.getElementById("simSwitch").addEventListener("click", () => setSimulate(!simulateOn));
+
+  renderTabs();
+  renderMain();
+</script>
+
+</body>
+</html>
