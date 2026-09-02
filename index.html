@@ -211,6 +211,43 @@
   .ai-generate-btn:hover { background: #235a51; }
   .ai-generate-btn:disabled { background: var(--border); cursor: default; }
   .ai-loading { font-size: 13px; color: var(--ink-muted); font-style: italic; margin-top: 10px; }
+
+  /* Admin overview */
+  .metric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
+  .metric-card { background: var(--surface); border: 1px solid var(--border); padding: 16px 18px; }
+  .metric-card .metric-label { font-size: 12px; color: var(--ink-muted); margin-bottom: 6px; }
+  .metric-card .metric-value { font-family: 'Newsreader', serif; font-size: 30px; font-weight: 500; }
+  .metric-card .metric-value.crit { color: var(--critical); }
+  .metric-card .metric-sub { font-size: 11px; color: var(--ink-muted); margin-top: 4px; }
+
+  .admin-section { margin-bottom: 28px; }
+  .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; font-size: 13px; }
+  .bar-row .bar-label { width: 110px; flex-shrink: 0; color: var(--ink-muted); }
+  .bar-row .bar-track { flex: 1; height: 10px; background: var(--bg); border: 1px solid var(--border); overflow: hidden; }
+  .bar-row .bar-fill { height: 100%; }
+  .bar-row .bar-fill.stable-fill { background: var(--stable); }
+  .bar-row .bar-fill.watch-fill { background: var(--watch); }
+  .bar-row .bar-fill.critical-fill { background: var(--critical); }
+  .bar-row .bar-fill.accent-fill { background: var(--accent); }
+  .bar-row .bar-count { width: 26px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+
+  .activity-log { background: var(--surface); border: 1px solid var(--border); }
+  .activity-row { display: flex; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .activity-row:last-child { border-bottom: none; }
+  .activity-row .act-meta { color: var(--ink-muted); font-size: 12px; }
+
+  /* Patient portal */
+  .patient-select-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; font-size: 13px; color: var(--ink-muted); }
+  .patient-select-bar select {
+    font-family: 'Inter', sans-serif; border: 1px solid var(--border); background: var(--surface); color: var(--ink);
+    padding: 6px 10px; border-radius: 3px;
+  }
+  .patient-hero { background: var(--surface); border: 1px solid var(--border); padding: 22px 24px; margin-bottom: 22px; }
+  .patient-hero h2 { font-size: 22px; margin-bottom: 4px; }
+  .patient-hero .ph-meta { color: var(--ink-muted); font-size: 13px; }
+  .patient-hero .ph-status { margin-top: 12px; font-size: 13px; }
+  .friendly-note { font-size: 13px; color: var(--ink-muted); line-height: 1.6; margin-top: 10px; }
+  .patient-section { margin-bottom: 22px; }
 </style>
 </head>
 <body>
@@ -234,6 +271,7 @@
           <option value="doctor">Doctor</option>
           <option value="pharmacy">Pharmacy</option>
           <option value="admin">Admin</option>
+          <option value="patient">Patient</option>
         </select>
       </div>
     </div>
@@ -335,13 +373,16 @@
     nurse: [{ id: "nurse", label: "My Patients" }],
     doctor: [{ id: "doctor", label: "My Patients" }],
     pharmacy: [{ id: "pharmacy", label: "Pharmacy" }],
-    admin: [{ id: "admin", label: "Overview" }]
+    admin: [{ id: "admin", label: "Overview" }],
+    patient: [{ id: "patient", label: "My Health" }]
   };
 
   let currentRole = "nurse";
   let selectedPatientId = null;
+  let viewingPatientId = "CS-10250"; // default patient-portal preview (stable patient, less alarming for demo)
   let simulateOn = false;
   let simInterval = null;
+  const TOTAL_BEDS = 10;
 
   function nowTime() { return new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); }
 
@@ -744,6 +785,105 @@
 
   function placeholder(title, body) { return `<div class="placeholder"><h3>${title}</h3><p>${body}</p></div>`; }
 
+  // ---- Admin Overview ----
+  function adminView() {
+    const total = patients.length;
+    const occupancyPct = Math.round((total / TOTAL_BEDS) * 100);
+    const statusCounts = { stable: 0, watch: 0, critical: 0 };
+    patients.forEach(p => statusCounts[p.status]++);
+
+    const activeAlerts = alerts.filter(a => !a.acknowledged).length;
+    const escalatedTotal = alerts.filter(a => a.escalated).length;
+    const acknowledged = alerts.filter(a => a.acknowledged && a.acknowledgedAtMs);
+    const avgResponseSec = acknowledged.length
+      ? Math.round(acknowledged.reduce((sum, a) => sum + (a.acknowledgedAtMs - a.createdAtMs) / 1000, 0) / acknowledged.length)
+      : null;
+
+    const stockOuts = Object.entries(medicineStock).filter(([, s]) => s.hospital === 0).length;
+    let allRx = []; patients.forEach(p => p.prescriptions.forEach(rx => allRx.push(rx)));
+    const rxAwaiting = allRx.filter(r => r.status === "pending").length;
+    const rxDispensed = allRx.filter(r => r.status === "dispensed").length;
+    const rxAdministered = allRx.filter(r => r.status === "administered").length;
+
+    const deptCounts = {};
+    patients.forEach(p => { deptCounts[p.department] = (deptCounts[p.department] || 0) + 1; });
+    const maxDept = Math.max(...Object.values(deptCounts), 1);
+
+    const metrics = `
+      <div class="metric-grid">
+        <div class="metric-card"><div class="metric-label">Bed Occupancy</div><div class="metric-value">${occupancyPct}%</div><div class="metric-sub">${total} of ${TOTAL_BEDS} beds occupied</div></div>
+        <div class="metric-card"><div class="metric-label">Active Alerts</div><div class="metric-value ${activeAlerts ? 'crit' : ''}">${activeAlerts}</div><div class="metric-sub">${escalatedTotal} escalated to backup (all-time)</div></div>
+        <div class="metric-card"><div class="metric-label">Avg. Alert Response</div><div class="metric-value">${avgResponseSec !== null ? avgResponseSec + 's' : '—'}</div><div class="metric-sub">${acknowledged.length} acknowledged alert${acknowledged.length === 1 ? '' : 's'} recorded</div></div>
+        <div class="metric-card"><div class="metric-label">Pharmacy Stock-outs</div><div class="metric-value ${stockOuts ? 'crit' : ''}">${stockOuts}</div><div class="metric-sub">of ${Object.keys(medicineStock).length} tracked medicines</div></div>
+        <div class="metric-card"><div class="metric-label">Prescriptions Awaiting Pharmacy</div><div class="metric-value">${rxAwaiting}</div><div class="metric-sub">${rxDispensed} dispensed · ${rxAdministered} administered</div></div>
+        <div class="metric-card"><div class="metric-label">Total Patients Monitored</div><div class="metric-value">${total}</div><div class="metric-sub">across ${Object.keys(deptCounts).length} departments</div></div>
+      </div>
+    `;
+
+    const statusBars = `
+      <div class="admin-section">
+        <h4 class="section-label">Patient Status Distribution</h4>
+        <div class="bar-row"><span class="bar-label">Stable</span><div class="bar-track"><div class="bar-fill stable-fill" style="width:${(statusCounts.stable / total) * 100}%"></div></div><span class="bar-count">${statusCounts.stable}</span></div>
+        <div class="bar-row"><span class="bar-label">Watch</span><div class="bar-track"><div class="bar-fill watch-fill" style="width:${(statusCounts.watch / total) * 100}%"></div></div><span class="bar-count">${statusCounts.watch}</span></div>
+        <div class="bar-row"><span class="bar-label">Alert</span><div class="bar-track"><div class="bar-fill critical-fill" style="width:${(statusCounts.critical / total) * 100}%"></div></div><span class="bar-count">${statusCounts.critical}</span></div>
+      </div>
+    `;
+
+    const deptBars = `
+      <div class="admin-section">
+        <h4 class="section-label">Department Workload</h4>
+        ${Object.entries(deptCounts).map(([dept, count]) => `
+          <div class="bar-row"><span class="bar-label">${dept}</span><div class="bar-track"><div class="bar-fill accent-fill" style="width:${(count / maxDept) * 100}%"></div></div><span class="bar-count">${count}</span></div>
+        `).join("")}
+      </div>
+    `;
+
+    const recentActivity = alerts.slice(0, 6).map(a => {
+      const p = getPatient(a.patientId);
+      let statusText = a.escalated ? `Escalated to ${a.escalatedTo}` : a.acknowledged ? "Acknowledged" : "Awaiting response";
+      return `<div class="activity-row"><span>${p.name} — ${statusLabels[a.severity]}</span><span class="act-meta">${statusText}</span></div>`;
+    }).join("") || `<div class="activity-row"><span>No alert activity recorded yet.</span></div>`;
+
+    return `
+      <div class="view-heading"><h2>Hospital Overview</h2><div class="subtext">live, computed from current patient and pharmacy data</div></div>
+      ${metrics}
+      ${statusBars}
+      ${deptBars}
+      <div class="admin-section"><h4 class="section-label">Recent Alert Activity</h4><div class="activity-log">${recentActivity}</div></div>
+    `;
+  }
+
+  // ---- Patient Portal ----
+  function patientPortalView() {
+    const p = getPatient(viewingPatientId);
+    const options = patients.map(pt => `<option value="${pt.id}" ${pt.id === viewingPatientId ? 'selected' : ''}>${pt.name} (${pt.id})</option>`).join("");
+
+    const friendlyStatus = {
+      stable: "Your readings are within the expected range. Your care team will continue routine monitoring.",
+      watch: "Your care team is keeping a closer eye on a couple of your readings today. This is a normal part of monitoring — no action is needed from you.",
+      critical: "Your care team has been notified about a change in your readings and is actively reviewing your condition."
+    };
+
+    const meds = p.prescriptions.length ? p.prescriptions.map(rx => `
+      <div class="med-item ${rx.status === 'administered' ? 'administered' : ''}">
+        <div><div class="med-name">${rx.medicine} <span style="color:var(--ink-muted);font-weight:400;">${rx.dose}</span></div><div class="med-meta">${rx.timing}</div></div>
+        <span class="${rx.status === 'administered' ? 'tag-administered' : rx.status === 'dispensed' ? 'tag-dispensed' : 'tag-awaiting'}">${rx.status === 'administered' ? 'Given' : rx.status === 'dispensed' ? 'Ready' : 'Pending'}</span>
+      </div>`).join("") : `<div style="font-size:13px;color:var(--ink-muted);">No medications currently prescribed.</div>`;
+
+    return `
+      <div class="patient-select-bar">Previewing patient portal as: <select id="patientPreviewSelect">${options}</select></div>
+      <div class="patient-hero">
+        <h2>Hello, ${p.name.split(' ').slice(-1)}</h2>
+        <div class="ph-meta">${p.bed} · ${p.department} · Under care of ${p.assignedDoctor}</div>
+        <div class="ph-status status-${p.status}"><span class="status-dot"></span><span class="status-label">${statusLabels[p.status]}</span></div>
+        <div class="friendly-note">${friendlyStatus[p.status]}</div>
+      </div>
+      <div class="patient-section"><h4 class="section-label">My Medicines</h4><div class="med-list">${meds}</div></div>
+      <div class="patient-section"><h4 class="section-label">My Diet Plan</h4><div class="placeholder" style="padding:24px;"><p style="margin:0;">Nutrition and diet plans are part of a future phase of CareSync AI.</p></div></div>
+      <div class="patient-section"><h4 class="section-label">My Bills</h4><div class="placeholder" style="padding:24px;"><p style="margin:0;">Billing and payment tracking are part of a future phase of CareSync AI.</p></div></div>
+    `;
+  }
+
   function pharmacyRequests() {
     const pending = [];
     patients.forEach(p => p.prescriptions.forEach(rx => { if (rx.status === "pending") pending.push({ p, rx }); }));
@@ -813,7 +953,11 @@
       main.innerHTML = pharmacyView();
       attachPharmacyHandlers();
     } else if (currentRole === "admin") {
-      main.innerHTML = placeholder("Admin overview", "Bed occupancy, alert response time, and operational metrics arrive on Day 9 of the build.");
+      main.innerHTML = adminView();
+    } else if (currentRole === "patient") {
+      main.innerHTML = patientPortalView();
+      const sel = document.getElementById("patientPreviewSelect");
+      if (sel) sel.addEventListener("change", (e) => { viewingPatientId = e.target.value; renderMain(); });
     }
   }
 
