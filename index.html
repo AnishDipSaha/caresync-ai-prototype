@@ -34,7 +34,6 @@
   }
 
   h1, h2, h3 { font-family: 'Newsreader', serif; font-weight: 500; margin: 0; }
-
   .mono { font-family: 'IBM Plex Mono', monospace; }
 
   header.app-header {
@@ -57,11 +56,7 @@
   .brand h1 { font-size: 22px; letter-spacing: -0.01em; }
   .brand .tagline { color: var(--ink-muted); font-size: 13px; margin-top: 2px; }
 
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-  }
+  .header-right { display: flex; align-items: center; gap: 18px; }
 
   .role-switch { font-size: 13px; color: var(--ink-muted); }
   .role-switch select {
@@ -74,53 +69,29 @@
     margin-left: 8px;
   }
 
-  .sim-toggle {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    color: var(--ink-muted);
-  }
+  .sim-toggle { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-muted); }
   .sim-toggle .switch {
-    width: 34px;
-    height: 18px;
-    border-radius: 10px;
-    background: var(--border);
-    position: relative;
-    cursor: pointer;
-    transition: background 0.15s ease;
+    width: 34px; height: 18px; border-radius: 10px; background: var(--border);
+    position: relative; cursor: pointer; transition: background 0.15s ease;
   }
   .sim-toggle .switch.on { background: var(--accent); }
   .sim-toggle .switch::after {
-    content: '';
-    position: absolute;
-    top: 2px; left: 2px;
-    width: 14px; height: 14px;
-    border-radius: 50%;
-    background: var(--surface);
-    transition: left 0.15s ease;
+    content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px;
+    border-radius: 50%; background: var(--surface); transition: left 0.15s ease;
   }
   .sim-toggle .switch.on::after { left: 18px; }
   .sim-toggle.live { color: var(--accent); font-weight: 500; }
   .pulse-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--accent);
-    display: inline-block;
-    animation: pulse 1.4s infinite ease-in-out;
+    width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+    display: inline-block; animation: pulse 1.4s infinite ease-in-out;
   }
   @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.25;} }
 
   nav.tabs { max-width: 1100px; margin: 0 auto; display: flex; gap: 4px; }
   nav.tabs button {
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    background: none;
-    border: none;
-    padding: 10px 16px;
-    color: var(--ink-muted);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: color 0.15s ease;
+    font-family: 'Inter', sans-serif; font-size: 14px; background: none; border: none;
+    padding: 10px 16px; color: var(--ink-muted); cursor: pointer;
+    border-bottom: 2px solid transparent; transition: color 0.15s ease;
   }
   nav.tabs button.active { color: var(--ink); border-bottom-color: var(--accent); font-weight: 500; }
   nav.tabs button:hover:not(.active) { color: var(--ink); }
@@ -130,6 +101,21 @@
   .view-heading { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; }
   .view-heading h2 { font-size: 20px; }
   .view-heading .subtext { color: var(--ink-muted); font-size: 13px; }
+
+  /* Attention strip (doctor view) */
+  .attention-strip {
+    display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .attention-chip {
+    display: flex; align-items: center; gap: 8px;
+    border: 1px solid var(--border); background: var(--surface);
+    padding: 8px 14px; font-size: 13px; cursor: pointer;
+  }
+  .attention-chip:hover { background: var(--bg); }
+  .attention-chip.crit { border-color: var(--critical); }
+  .attention-chip.watch-c { border-color: var(--watch); }
+  .attention-chip .name { font-weight: 500; }
+  .attention-chip .reason { color: var(--ink-muted); font-size: 12px; }
 
   table.patient-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); }
   table.patient-table th {
@@ -162,32 +148,19 @@
   .placeholder p { font-size: 14px; max-width: 420px; margin: 0 auto; line-height: 1.6; }
 
   /* Detail panel */
-  .detail-panel {
-    margin-top: 20px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-  }
-  .detail-header {
-    display: flex; align-items: baseline; justify-content: space-between;
-    padding: 16px 20px; border-bottom: 1px solid var(--border);
-  }
+  .detail-panel { margin-top: 20px; background: var(--surface); border: 1px solid var(--border); }
+  .detail-header { display: flex; align-items: baseline; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
   .detail-header h3 { font-size: 17px; }
   .detail-header .meta { font-size: 12px; color: var(--ink-muted); margin-top: 3px; }
-  .close-btn {
-    border: none; background: none; color: var(--ink-muted); cursor: pointer; font-size: 13px;
-  }
+  .close-btn { border: none; background: none; color: var(--ink-muted); cursor: pointer; font-size: 13px; }
   .close-btn:hover { color: var(--ink); }
 
   .detail-body { display: grid; grid-template-columns: 1.1fr 1fr; gap: 0; }
   .detail-col { padding: 20px; }
   .detail-col + .detail-col { border-left: 1px solid var(--border); }
 
-  .vitals-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;
-  }
-  .vital-box {
-    border: 1px solid var(--border); padding: 10px 12px; background: var(--bg);
-  }
+  .vitals-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .vital-box { border: 1px solid var(--border); padding: 10px 12px; background: var(--bg); }
   .vital-box .label { font-size: 11px; color: var(--ink-muted); text-transform: none; }
   .vital-box .value { font-size: 18px; font-weight: 500; margin-top: 2px; }
   .vital-box.flag-critical { border-color: var(--critical); background: var(--critical-soft); }
@@ -196,13 +169,16 @@
   h4.section-label { font-size: 13px; font-weight: 500; color: var(--ink-muted); margin: 0 0 10px; }
 
   form.vitals-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
-  form.vitals-form label { font-size: 12px; color: var(--ink-muted); display: block; margin-bottom: 4px; }
-  form.vitals-form input {
+  form.vitals-form label, form.rx-form label { font-size: 12px; color: var(--ink-muted); display: block; margin-bottom: 4px; }
+  form.vitals-form input, form.rx-form input {
     width: 100%; font-family: 'IBM Plex Mono', monospace; font-size: 13px;
     padding: 7px 9px; border: 1px solid var(--border); border-radius: 2px; background: var(--surface); color: var(--ink);
   }
-  form.vitals-form input:focus { outline: none; border-color: var(--accent); }
+  form.vitals-form input:focus, form.rx-form input:focus { outline: none; border-color: var(--accent); }
   .form-actions { grid-column: 1 / -1; margin-top: 4px; }
+
+  form.rx-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; margin-bottom: 20px; }
+  form.rx-form .full { grid-column: 1 / -1; }
 
   button.primary-btn {
     background: var(--accent); color: #fff; border: none; padding: 8px 16px;
@@ -214,24 +190,25 @@
     font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; border-radius: 2px;
   }
   button.secondary-btn:hover { background: var(--accent-soft); }
-  button.secondary-btn:disabled {
-    border-color: var(--border); color: var(--ink-muted); cursor: default; background: none;
-  }
 
   .med-list { display: flex; flex-direction: column; gap: 8px; }
-  .med-item {
-    display: flex; align-items: center; justify-content: space-between;
-    border: 1px solid var(--border); padding: 10px 12px; font-size: 13px;
-  }
+  .med-item { display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border); padding: 10px 12px; font-size: 13px; }
   .med-item .med-name { font-weight: 500; }
   .med-item .med-meta { color: var(--ink-muted); font-size: 12px; margin-top: 2px; }
   .med-item.administered { opacity: 0.55; }
-  .tag-administered {
-    font-size: 11px; color: var(--stable); background: var(--stable-soft); padding: 2px 8px; border-radius: 10px;
-  }
+  .tag-administered { font-size: 11px; color: var(--stable); background: var(--stable-soft); padding: 2px 8px; border-radius: 10px; }
+  .tag-pending { font-size: 11px; color: var(--watch); background: var(--watch-soft); padding: 2px 8px; border-radius: 10px; }
 
   .history-log { margin-top: 16px; font-size: 12px; color: var(--ink-muted); }
   .history-log .entry { padding: 4px 0; border-bottom: 1px dashed var(--border); }
+
+  /* Trend charts */
+  .chart-block { margin-bottom: 18px; }
+  .chart-block .chart-title {
+    display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-muted); margin-bottom: 4px;
+  }
+  .chart-block .chart-title b { color: var(--ink); font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
+  .chart-block svg { display: block; width: 100%; height: 56px; }
 
   footer {
     max-width: 1100px; margin: 0 auto; padding: 0 32px 32px; color: var(--ink-muted); font-size: 12px;
@@ -281,8 +258,8 @@
       vitals: { spo2: 89, heartRate: 108, systolic: 152, diastolic: 96, temp: 38.2, glucose: 178, respRate: 22 },
       history: [],
       prescriptions: [
-        { id: "rx1", medicine: "Furosemide 20mg", dose: "20mg", timing: "8:00 AM", status: "pending" },
-        { id: "rx2", medicine: "Metoprolol 25mg", dose: "25mg", timing: "8:00 AM", status: "administered", administeredAt: "8:04 AM" }
+        { id: "rx1", medicine: "Furosemide", dose: "20mg", timing: "8:00 AM", status: "pending" },
+        { id: "rx2", medicine: "Metoprolol", dose: "25mg", timing: "8:00 AM", status: "administered", administeredAt: "8:04 AM" }
       ]
     },
     {
@@ -290,9 +267,7 @@
       assignedDoctor: "Dr. Menon", assignedNurse: "Nurse Fernandes", trend: "stable",
       vitals: { spo2: 97, heartRate: 78, systolic: 118, diastolic: 76, temp: 37.0, glucose: 96, respRate: 16 },
       history: [],
-      prescriptions: [
-        { id: "rx3", medicine: "Paracetamol 650mg", dose: "650mg", timing: "2:00 PM", status: "pending" }
-      ]
+      prescriptions: [ { id: "rx3", medicine: "Paracetamol", dose: "650mg", timing: "2:00 PM", status: "pending" } ]
     },
     {
       id: "CS-10247", name: "K. Verma", age: 71, bed: "Ward-15", department: "Pulmonology",
@@ -301,7 +276,7 @@
       history: [],
       prescriptions: [
         { id: "rx4", medicine: "Salbutamol Inhaler", dose: "2 puffs", timing: "12:00 PM", status: "pending" },
-        { id: "rx5", medicine: "Azithromycin 500mg", dose: "500mg", timing: "9:00 AM", status: "administered", administeredAt: "9:10 AM" }
+        { id: "rx5", medicine: "Azithromycin", dose: "500mg", timing: "9:00 AM", status: "administered", administeredAt: "9:10 AM" }
       ]
     },
     {
@@ -309,18 +284,14 @@
       assignedDoctor: "Dr. Menon", assignedNurse: "Nurse Ali", trend: "stable",
       vitals: { spo2: 98, heartRate: 72, systolic: 122, diastolic: 80, temp: 36.9, glucose: 101, respRate: 15 },
       history: [],
-      prescriptions: [
-        { id: "rx6", medicine: "Ibuprofen 400mg", dose: "400mg", timing: "1:00 PM", status: "pending" }
-      ]
+      prescriptions: [ { id: "rx6", medicine: "Ibuprofen", dose: "400mg", timing: "1:00 PM", status: "pending" } ]
     },
     {
       id: "CS-10249", name: "P. Das", age: 62, bed: "ICU-01", department: "Cardiology",
       assignedDoctor: "Dr. Iyer", assignedNurse: "Nurse Fernandes", trend: "slow-worsening",
       vitals: { spo2: 94, heartRate: 101, systolic: 145, diastolic: 90, temp: 37.9, glucose: 165, respRate: 19 },
       history: [],
-      prescriptions: [
-        { id: "rx7", medicine: "Atorvastatin 20mg", dose: "20mg", timing: "9:00 PM", status: "pending" }
-      ]
+      prescriptions: [ { id: "rx7", medicine: "Atorvastatin", dose: "20mg", timing: "9:00 PM", status: "pending" } ]
     },
     {
       id: "CS-10250", name: "M. Reddy", age: 29, bed: "Ward-20", department: "General Medicine",
@@ -332,6 +303,7 @@
   ];
 
   const statusLabels = { stable: "Stable", watch: "Watch", critical: "Alert" };
+  let rxCounter = 100;
 
   const tabsByRole = {
     nurse: [{ id: "nurse", label: "My Patients" }],
@@ -362,7 +334,6 @@
     if (p.history.length > 20) p.history.shift();
   }
 
-  // initialize history with current reading
   patients.forEach(p => { p.status = computeStatus(p.vitals); pushHistory(p); });
 
   function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
@@ -387,10 +358,7 @@
     pushHistory(p);
   }
 
-  function tickSimulation() {
-    patients.forEach(nudgeVitals);
-    renderMain();
-  }
+  function tickSimulation() { patients.forEach(nudgeVitals); renderMain(); }
 
   function setSimulate(on) {
     simulateOn = on;
@@ -399,11 +367,8 @@
     document.getElementById("simLabel").innerHTML = on
       ? '<span class="pulse-dot"></span> Live vitals streaming'
       : 'Simulate live vitals';
-    if (on) {
-      simInterval = setInterval(tickSimulation, 4000);
-    } else {
-      clearInterval(simInterval);
-    }
+    if (on) simInterval = setInterval(tickSimulation, 4000);
+    else clearInterval(simInterval);
   }
 
   function renderTabs() {
@@ -445,11 +410,49 @@
     `;
   }
 
+  function attentionStrip() {
+    const flagged = patients.filter(p => p.status !== "stable");
+    if (!flagged.length) return "";
+    const chips = flagged.map(p => {
+      const reasons = [];
+      if (p.vitals.spo2 < 94) reasons.push(`SpO2 ${p.vitals.spo2}%`);
+      if (p.vitals.heartRate > 100) reasons.push(`HR ${p.vitals.heartRate}`);
+      if (p.vitals.temp > 37.8) reasons.push(`Temp ${p.vitals.temp}°C`);
+      return `
+        <div class="attention-chip ${p.status === 'critical' ? 'crit' : 'watch-c'}" data-id="${p.id}">
+          <span class="status-dot status-${p.status}"></span>
+          <span class="name">${p.name}</span>
+          <span class="reason">${reasons.join(', ') || statusLabels[p.status]}</span>
+        </div>
+      `;
+    }).join("");
+    return `<div class="attention-strip">${chips}</div>`;
+  }
+
   function vitalBoxClass(key, v) {
     if (key === "spo2") return v < 90 ? "flag-critical" : v < 94 ? "flag-watch" : "";
     if (key === "heartRate") return (v > 115 || v < 50) ? "flag-critical" : v > 100 ? "flag-watch" : "";
     if (key === "temp") return v > 39 ? "flag-critical" : v > 37.8 ? "flag-watch" : "";
     return "";
+  }
+
+  function sparkline(values, colorVar, min, max) {
+    if (values.length < 2) return `<svg viewBox="0 0 300 56"></svg>`;
+    const w = 300, h = 56, pad = 4;
+    const range = (max - min) || 1;
+    const step = (w - pad * 2) / (values.length - 1);
+    const pts = values.map((v, i) => {
+      const x = pad + i * step;
+      const y = h - pad - ((v - min) / range) * (h - pad * 2);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    });
+    const last = pts[pts.length - 1].split(",");
+    return `
+      <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+        <polyline points="${pts.join(' ')}" fill="none" stroke="var(${colorVar})" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+        <circle cx="${last[0]}" cy="${last[1]}" r="3" fill="var(${colorVar})"/>
+      </svg>
+    `;
   }
 
   function nurseDetailPanel(p) {
@@ -463,17 +466,14 @@
         <div class="value">${p.vitals[key]}${unit === '%' ? '%' : ''} ${unit !== '%' ? `<span style="font-size:11px;color:var(--ink-muted);">${unit}</span>` : ''}</div>
       </div>
     `).join("") + `
-      <div class="vital-box">
-        <div class="label">Blood Pressure</div>
-        <div class="value">${bp(p.vitals)}</div>
-      </div>
+      <div class="vital-box"><div class="label">Blood Pressure</div><div class="value">${bp(p.vitals)}</div></div>
     `;
 
     const medsList = p.prescriptions.length
       ? p.prescriptions.map(rx => `
         <div class="med-item ${rx.status === 'administered' ? 'administered' : ''}">
           <div>
-            <div class="med-name">${rx.medicine}</div>
+            <div class="med-name">${rx.medicine} <span style="color:var(--ink-muted);font-weight:400;">${rx.dose}</span></div>
             <div class="med-meta">${rx.timing}${rx.status === 'administered' ? ' · given ' + rx.administeredAt : ''}</div>
           </div>
           ${rx.status === 'administered'
@@ -521,6 +521,77 @@
     `;
   }
 
+  function doctorDetailPanel(p) {
+    const spo2Vals = p.history.map(h => h.spo2);
+    const hrVals = p.history.map(h => h.heartRate);
+
+    const vitalDefs = [
+      ["spo2", "SpO2", "%"], ["heartRate", "Heart Rate", "bpm"],
+      ["temp", "Temperature", "°C"], ["glucose", "Glucose", "mg/dL"], ["respRate", "Resp. Rate", "/min"]
+    ];
+    const vitalsBoxes = vitalDefs.map(([key, label, unit]) => `
+      <div class="vital-box ${vitalBoxClass(key, p.vitals[key])}">
+        <div class="label">${label}</div>
+        <div class="value">${p.vitals[key]}${unit === '%' ? '%' : ''} ${unit !== '%' ? `<span style="font-size:11px;color:var(--ink-muted);">${unit}</span>` : ''}</div>
+      </div>
+    `).join("") + `
+      <div class="vital-box"><div class="label">Blood Pressure</div><div class="value">${bp(p.vitals)}</div></div>
+    `;
+
+    const medsList = p.prescriptions.length
+      ? p.prescriptions.map(rx => `
+        <div class="med-item ${rx.status === 'administered' ? 'administered' : ''}">
+          <div>
+            <div class="med-name">${rx.medicine} <span style="color:var(--ink-muted);font-weight:400;">${rx.dose}</span></div>
+            <div class="med-meta">${rx.timing}</div>
+          </div>
+          ${rx.status === 'administered'
+            ? `<span class="tag-administered">Administered</span>`
+            : `<span class="tag-pending">Pending</span>`}
+        </div>
+      `).join("")
+      : `<div style="font-size:13px;color:var(--ink-muted);">No prescriptions yet.</div>`;
+
+    return `
+      <div class="detail-panel">
+        <div class="detail-header">
+          <div>
+            <h3>${p.name} <span class="mono" style="font-size:13px;color:var(--ink-muted);">${p.id}</span></h3>
+            <div class="meta">${p.bed} · ${p.department} · Assigned: ${p.assignedDoctor}</div>
+          </div>
+          <button class="close-btn" id="closeDetail">Close ✕</button>
+        </div>
+        <div class="detail-body">
+          <div class="detail-col">
+            <h4 class="section-label">Current Vitals</h4>
+            <div class="vitals-grid">${vitalsBoxes}</div>
+
+            <h4 class="section-label">Trends</h4>
+            <div class="chart-block">
+              <div class="chart-title">SpO2 <b>${p.vitals.spo2}%</b></div>
+              ${sparkline(spo2Vals, '--critical', 82, 100)}
+            </div>
+            <div class="chart-block">
+              <div class="chart-title">Heart Rate <b>${p.vitals.heartRate} bpm</b></div>
+              ${sparkline(hrVals, '--accent', 50, 145)}
+            </div>
+          </div>
+          <div class="detail-col">
+            <h4 class="section-label">Prescribe Medicine</h4>
+            <form class="rx-form" id="rxForm">
+              <div class="full"><label>Medicine name</label><input type="text" name="medicine" placeholder="e.g. Amoxicillin" required></div>
+              <div><label>Dose</label><input type="text" name="dose" placeholder="e.g. 500mg" required></div>
+              <div><label>Timing</label><input type="text" name="timing" placeholder="e.g. 9:00 AM" required></div>
+              <div class="form-actions"><button type="submit" class="primary-btn">Add prescription</button></div>
+            </form>
+            <h4 class="section-label">Prescriptions</h4>
+            <div class="med-list">${medsList}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   function placeholder(title, body) {
     return `<div class="placeholder"><h3>${title}</h3><p>${body}</p></div>`;
   }
@@ -536,8 +607,13 @@
       main.innerHTML = html;
       attachNurseHandlers();
     } else if (currentRole === "doctor") {
-      main.innerHTML = patientTable();
-      attachRowSelectHandlers();
+      let html = attentionStrip() + patientTable();
+      if (selectedPatientId) {
+        const p = getPatient(selectedPatientId);
+        if (p) html += doctorDetailPanel(p);
+      }
+      main.innerHTML = html;
+      attachDoctorHandlers();
     } else if (currentRole === "pharmacy") {
       main.innerHTML = placeholder("Pharmacy portal", "Stock levels, prescription requests, and partner pharmacy availability arrive on Day 7 of the build.");
     } else if (currentRole === "admin") {
@@ -552,11 +628,16 @@
         renderMain();
       });
     });
+    document.querySelectorAll(".attention-chip").forEach(chip => {
+      chip.addEventListener("click", () => {
+        selectedPatientId = chip.dataset.id;
+        renderMain();
+      });
+    });
   }
 
   function attachNurseHandlers() {
     attachRowSelectHandlers();
-
     const closeBtn = document.getElementById("closeDetail");
     if (closeBtn) closeBtn.addEventListener("click", () => { selectedPatientId = null; renderMain(); });
 
@@ -587,6 +668,30 @@
         renderMain();
       });
     });
+  }
+
+  function attachDoctorHandlers() {
+    attachRowSelectHandlers();
+    const closeBtn = document.getElementById("closeDetail");
+    if (closeBtn) closeBtn.addEventListener("click", () => { selectedPatientId = null; renderMain(); });
+
+    const rxForm = document.getElementById("rxForm");
+    if (rxForm) {
+      rxForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const p = getPatient(selectedPatientId);
+        const fd = new FormData(rxForm);
+        rxCounter++;
+        p.prescriptions.unshift({
+          id: "rx" + rxCounter,
+          medicine: fd.get("medicine"),
+          dose: fd.get("dose"),
+          timing: fd.get("timing"),
+          status: "pending"
+        });
+        renderMain();
+      });
+    }
   }
 
   document.getElementById("roleSelect").addEventListener("change", (e) => {
