@@ -168,6 +168,20 @@
 
   footer { max-width: 1100px; margin: 0 auto; padding: 0 32px 32px; color: var(--ink-muted); font-size: 12px; line-height: 1.6; border-top: 1px solid var(--border); padding-top: 16px; }
 
+  @media (max-width: 720px) {
+    header.app-header { padding: 16px 18px 0; }
+    .header-top { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .header-right { flex-wrap: wrap; gap: 12px; }
+    main { padding: 20px 18px; }
+    .detail-body { grid-template-columns: 1fr; }
+    .detail-col + .detail-col { border-left: none; border-top: 1px solid var(--border); }
+    .vitals-grid { grid-template-columns: repeat(2, 1fr); }
+    .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    form.vitals-form, form.rx-form { grid-template-columns: 1fr; }
+    table.patient-table { font-size: 12px; }
+    .vitals-inline { flex-wrap: wrap; gap: 8px; }
+  }
+
   /* Pharmacy */
   .rx-request {
     background: var(--surface); border: 1px solid var(--border); padding: 14px 16px; margin-bottom: 10px;
@@ -282,7 +296,7 @@
 <main id="main"></main>
 
 <footer>
-  Vitals shown here are simulated for demonstration purposes only. Alert thresholds are illustrative and would need clinical validation before real-world use. AI features in later builds are intended as clinical decision-support, not autonomous diagnosis or prescription.
+  CareSync AI — prototype build. Patient data, vitals, and pharmacy stock shown here are simulated for demonstration purposes. The AI summary feature uses rule-based analysis of recorded data, not a live clinical model. All AI and automated features are intended as decision-support tools only — diagnosis, prescription, and clinical action remain the responsibility of licensed healthcare professionals.
 </footer>
 
 <script>
@@ -783,7 +797,7 @@
     </div>`;
   }
 
-  function placeholder(title, body) { return `<div class="placeholder"><h3>${title}</h3><p>${body}</p></div>`; }
+  function placeholder(title, body) { return `<div class="placeholder"><h3>${title}</h3><p>${body}</p></div>`; } // retained for any future "coming soon" panels
 
   // ---- Admin Overview ----
   function adminView() {
