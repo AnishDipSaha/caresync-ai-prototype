@@ -167,6 +167,32 @@
   .chart-block svg { display: block; width: 100%; height: 56px; }
 
   footer { max-width: 1100px; margin: 0 auto; padding: 0 32px 32px; color: var(--ink-muted); font-size: 12px; line-height: 1.6; border-top: 1px solid var(--border); padding-top: 16px; }
+
+  /* Pharmacy */
+  .rx-request {
+    background: var(--surface); border: 1px solid var(--border); padding: 14px 16px; margin-bottom: 10px;
+  }
+  .rx-request .rx-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .rx-request .rx-top .patient-line { font-size: 13px; color: var(--ink-muted); }
+  .rx-request .rx-top .med-line { font-weight: 500; font-size: 14px; }
+  .stock-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; padding: 4px 0; }
+  .stock-row .src-name { color: var(--ink-muted); }
+  .stock-available { color: var(--stable); font-weight: 500; }
+  .stock-out { color: var(--critical); font-weight: 500; }
+  .procure-btn {
+    background: none; border: 1px solid var(--accent); color: var(--accent); padding: 5px 12px;
+    font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; border-radius: 2px;
+  }
+  .procure-btn:hover { background: var(--accent-soft); }
+  .hospital-out-note { color: var(--critical); font-size: 12px; font-weight: 500; margin-bottom: 6px; }
+  .tag-dispensed { font-size: 11px; color: var(--accent); background: var(--accent-soft); padding: 2px 8px; border-radius: 10px; }
+  .tag-awaiting { font-size: 11px; color: var(--ink-muted); background: var(--bg); padding: 2px 8px; border-radius: 10px; }
+  .procured-note { font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
+
+  table.stock-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); margin-top: 10px; }
+  table.stock-table th { text-align: left; font-size: 12px; font-weight: 500; color: var(--ink-muted); padding: 8px 14px; border-bottom: 1px solid var(--border); }
+  table.stock-table td { padding: 9px 14px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  table.stock-table tr:last-child td { border-bottom: none; }
 </style>
 </head>
 <body>
@@ -258,6 +284,30 @@
 
   const statusLabels = { stable: "Stable", watch: "Watch", critical: "Alert" };
   const doctorBackup = { "Dr. Iyer": "Dr. Menon", "Dr. Menon": "Dr. Iyer" };
+  const partnerPharmacyNames = ["Apollo Pharmacy", "MedPlus", "Wellness Forever"];
+  const medicineStock = {
+    "Furosemide": { hospital: 0, partners: { "Apollo Pharmacy": 15, "MedPlus": 0, "Wellness Forever": 7 } },
+    "Metoprolol": { hospital: 32, partners: { "Apollo Pharmacy": 10, "MedPlus": 6, "Wellness Forever": 0 } },
+    "Paracetamol": { hospital: 120, partners: { "Apollo Pharmacy": 50, "MedPlus": 40, "Wellness Forever": 60 } },
+    "Salbutamol Inhaler": { hospital: 0, partners: { "Apollo Pharmacy": 0, "MedPlus": 4, "Wellness Forever": 2 } },
+    "Azithromycin": { hospital: 18, partners: { "Apollo Pharmacy": 9, "MedPlus": 0, "Wellness Forever": 5 } },
+    "Ibuprofen": { hospital: 60, partners: { "Apollo Pharmacy": 30, "MedPlus": 25, "Wellness Forever": 20 } },
+    "Atorvastatin": { hospital: 0, partners: { "Apollo Pharmacy": 0, "MedPlus": 0, "Wellness Forever": 3 } }
+  };
+  function getStockEntry(medicineName) {
+    if (!medicineStock[medicineName]) {
+      const seed = medicineName.split('').reduce((a, c) => a + c.charCodeAt(0), 0) || 7;
+      medicineStock[medicineName] = {
+        hospital: seed % 5 === 0 ? 0 : (seed % 30) + 5,
+        partners: {
+          "Apollo Pharmacy": (seed * 3) % 25,
+          "MedPlus": (seed * 7) % 20,
+          "Wellness Forever": (seed * 5) % 15
+        }
+      };
+    }
+    return medicineStock[medicineName];
+  }
   const ESCALATION_MS = 18000; // demo-paced escalation window
   let rxCounter = 100;
   let alertCounter = 0;
@@ -367,6 +417,39 @@
   }
 
   function tickSimulation() { patients.forEach(nudgeVitals); renderMain(); }
+
+  // ---- Pharmacy actions ----
+  function findPrescription(rxId) {
+    for (const p of patients) {
+      const rx = p.prescriptions.find(r => r.id === rxId);
+      if (rx) return { p, rx };
+    }
+    return null;
+  }
+
+  function dispenseFromHospital(rxId) {
+    const found = findPrescription(rxId);
+    if (!found) return;
+    const stock = getStockEntry(found.rx.medicine);
+    if (stock.hospital > 0) {
+      stock.hospital -= 1;
+      found.rx.status = "dispensed";
+      found.rx.source = "Hospital Pharmacy";
+    }
+    renderMain();
+  }
+
+  function procureFromPartner(rxId, partnerName) {
+    const found = findPrescription(rxId);
+    if (!found) return;
+    const stock = getStockEntry(found.rx.medicine);
+    if (stock.partners[partnerName] > 0) {
+      stock.partners[partnerName] -= 1;
+      found.rx.status = "dispensed";
+      found.rx.source = partnerName;
+    }
+    renderMain();
+  }
 
   function setSimulate(on) {
     simulateOn = on;
@@ -489,11 +572,18 @@
       <div class="vital-box ${vitalBoxClass(key, p.vitals[key])}"><div class="label">${label}</div><div class="value">${p.vitals[key]}${unit === '%' ? '%' : ''} ${unit !== '%' ? `<span style="font-size:11px;color:var(--ink-muted);">${unit}</span>` : ''}</div></div>
     `).join("") + `<div class="vital-box"><div class="label">Blood Pressure</div><div class="value">${bp(p.vitals)}</div></div>`;
 
-    const medsList = p.prescriptions.length ? p.prescriptions.map(rx => `
+    const medsList = p.prescriptions.length ? p.prescriptions.map(rx => {
+      let tag, action;
+      if (rx.status === 'administered') { tag = `<span class="tag-administered">Administered</span>`; action = ''; }
+      else if (rx.status === 'dispensed') { tag = `<span class="tag-dispensed">Ready</span>`; action = `<button class="secondary-btn" data-admin="${rx.id}">Mark administered</button>`; }
+      else { tag = `<span class="tag-awaiting">Awaiting pharmacy</span>`; action = ''; }
+      return `
       <div class="med-item ${rx.status === 'administered' ? 'administered' : ''}">
-        <div><div class="med-name">${rx.medicine} <span style="color:var(--ink-muted);font-weight:400;">${rx.dose}</span></div><div class="med-meta">${rx.timing}${rx.status === 'administered' ? ' · given ' + rx.administeredAt : ''}</div></div>
-        ${rx.status === 'administered' ? `<span class="tag-administered">Administered</span>` : `<button class="secondary-btn" data-admin="${rx.id}">Mark administered</button>`}
-      </div>`).join("") : `<div style="font-size:13px;color:var(--ink-muted);">No pending medications.</div>`;
+        <div><div class="med-name">${rx.medicine} <span style="color:var(--ink-muted);font-weight:400;">${rx.dose}</span></div>
+        <div class="med-meta">${rx.timing}${rx.status === 'administered' ? ' · given ' + rx.administeredAt : ''}${rx.source ? ' · from ' + rx.source : ''}</div></div>
+        ${action || tag}
+      </div>`;
+    }).join("") : `<div style="font-size:13px;color:var(--ink-muted);">No pending medications.</div>`;
 
     const historyEntries = [...p.history].slice(-5).reverse().map(h => `<div class="entry">${h.time} — SpO2 ${h.spo2}%, HR ${h.heartRate}, BP ${h.systolic}/${h.diastolic}, Temp ${h.temp}°C</div>`).join("");
 
@@ -526,11 +616,15 @@
       <div class="vital-box ${vitalBoxClass(key, p.vitals[key])}"><div class="label">${label}</div><div class="value">${p.vitals[key]}${unit === '%' ? '%' : ''} ${unit !== '%' ? `<span style="font-size:11px;color:var(--ink-muted);">${unit}</span>` : ''}</div></div>
     `).join("") + `<div class="vital-box"><div class="label">Blood Pressure</div><div class="value">${bp(p.vitals)}</div></div>`;
 
-    const medsList = p.prescriptions.length ? p.prescriptions.map(rx => `
-      <div class="med-item ${rx.status === 'administered' ? 'administered' : ''}">
-        <div><div class="med-name">${rx.medicine} <span style="color:var(--ink-muted);font-weight:400;">${rx.dose}</span></div><div class="med-meta">${rx.timing}</div></div>
-        ${rx.status === 'administered' ? `<span class="tag-administered">Administered</span>` : `<span class="tag-pending">Pending</span>`}
-      </div>`).join("") : `<div style="font-size:13px;color:var(--ink-muted);">No prescriptions yet.</div>`;
+    const medsList = p.prescriptions.length ? p.prescriptions.map(rx => {
+      const tag = rx.status === 'administered' ? `<span class="tag-administered">Administered</span>`
+        : rx.status === 'dispensed' ? `<span class="tag-dispensed">Dispensed</span>`
+        : `<span class="tag-awaiting">Awaiting pharmacy</span>`;
+      return `<div class="med-item ${rx.status === 'administered' ? 'administered' : ''}">
+        <div><div class="med-name">${rx.medicine} <span style="color:var(--ink-muted);font-weight:400;">${rx.dose}</span></div><div class="med-meta">${rx.timing}${rx.source ? ' · from ' + rx.source : ''}</div></div>
+        ${tag}
+      </div>`;
+    }).join("") : `<div style="font-size:13px;color:var(--ink-muted);">No prescriptions yet.</div>`;
 
     return `<div class="detail-panel">
       <div class="detail-header"><div><h3>${p.name} <span class="mono" style="font-size:13px;color:var(--ink-muted);">${p.id}</span></h3><div class="meta">${p.bed} · ${p.department} · Assigned: ${p.assignedDoctor}</div></div><button class="close-btn" id="closeDetail">Close ✕</button></div>
@@ -555,6 +649,58 @@
 
   function placeholder(title, body) { return `<div class="placeholder"><h3>${title}</h3><p>${body}</p></div>`; }
 
+  function pharmacyRequests() {
+    const pending = [];
+    patients.forEach(p => p.prescriptions.forEach(rx => { if (rx.status === "pending") pending.push({ p, rx }); }));
+
+    if (!pending.length) {
+      return `<div class="no-alerts">No pending prescription requests. All caught up.</div>`;
+    }
+
+    return pending.map(({ p, rx }) => {
+      const stock = getStockEntry(rx.medicine);
+      let body;
+      if (stock.hospital > 0) {
+        body = `<div class="stock-row"><span class="src-name">Hospital Pharmacy</span><span class="stock-available">${stock.hospital} in stock</span></div>
+          <div style="margin-top:8px;"><button class="procure-btn" data-dispense="${rx.id}">Dispense from hospital stock</button></div>`;
+      } else {
+        const partnerRows = partnerPharmacyNames.map(name => {
+          const qty = stock.partners[name];
+          return `<div class="stock-row">
+            <span class="src-name">${name}</span>
+            ${qty > 0 ? `<span class="stock-available">${qty} available</span>` : `<span class="stock-out">Out of stock</span>`}
+          </div>
+          ${qty > 0 ? `<div style="margin-bottom:8px;"><button class="procure-btn" data-procure="${rx.id}" data-partner="${name}">Arrange procurement — ${name}</button></div>` : ''}`;
+        }).join("");
+        body = `<div class="hospital-out-note">✕ Not available at Hospital Pharmacy — checking partner network</div>${partnerRows}`;
+      }
+      return `<div class="rx-request">
+        <div class="rx-top"><span class="med-line">${rx.medicine} <span style="color:var(--ink-muted);font-weight:400;">${rx.dose}</span></span><span class="patient-line">${p.name} · ${p.id} · ${rx.timing}</span></div>
+        ${body}
+      </div>`;
+    }).join("");
+  }
+
+  function pharmacyStockTable() {
+    const rows = Object.entries(medicineStock).map(([name, stock]) => `
+      <tr><td>${name}</td><td class="mono">${stock.hospital}</td>
+      <td class="mono">${partnerPharmacyNames.map(n => `${n}: ${stock.partners[n]}`).join(' · ')}</td></tr>
+    `).join("");
+    return `<table class="stock-table">
+      <thead><tr><th>Medicine</th><th>Hospital Stock</th><th>Partner Network</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  }
+
+  function pharmacyView() {
+    return `
+      <div class="view-heading"><h2>Prescription Requests</h2><div class="subtext">awaiting dispense or procurement</div></div>
+      ${pharmacyRequests()}
+      <div class="view-heading" style="margin-top:32px;"><h2>Hospital Pharmacy Stock</h2><div class="subtext">${Object.keys(medicineStock).length} medicines tracked</div></div>
+      ${pharmacyStockTable()}
+    `;
+  }
+
   function renderMain() {
     renderAlertBadge();
     const main = document.getElementById("main");
@@ -569,7 +715,8 @@
       main.innerHTML = html;
       attachDoctorHandlers();
     } else if (currentRole === "pharmacy") {
-      main.innerHTML = placeholder("Pharmacy portal", "Stock levels, prescription requests, and partner pharmacy availability arrive on Day 7 of the build.");
+      main.innerHTML = pharmacyView();
+      attachPharmacyHandlers();
     } else if (currentRole === "admin") {
       main.innerHTML = placeholder("Admin overview", "Bed occupancy, alert response time, and operational metrics arrive on Day 9 of the build.");
     }
@@ -643,6 +790,15 @@
         renderMain();
       });
     }
+  }
+
+  function attachPharmacyHandlers() {
+    document.querySelectorAll("[data-dispense]").forEach(btn => {
+      btn.addEventListener("click", () => dispenseFromHospital(btn.dataset.dispense));
+    });
+    document.querySelectorAll("[data-procure]").forEach(btn => {
+      btn.addEventListener("click", () => procureFromPartner(btn.dataset.procure, btn.dataset.partner));
+    });
   }
 
   document.getElementById("roleSelect").addEventListener("change", (e) => {
