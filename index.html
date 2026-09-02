@@ -5,112 +5,83 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CareSync AI — Hospital Care Platform</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,500;0,600;1,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #EFF2EF;
-    --surface: #FFFFFF;
-    --ink: #17242B;
-    --ink-muted: #5B6B70;
-    --border: #D8DDD9;
-    --accent: #2B6E63;
-    --accent-soft: #E3ECE9;
-    --critical: #B23A32;
-    --critical-soft: #F6E6E4;
-    --watch: #B8811F;
-    --watch-soft: #F5EDDB;
-    --stable: #2E7D5B;
-    --stable-soft: #E4EFE8;
+    --bg: #EFF2EF; --surface: #FFFFFF; --ink: #17242B; --ink-muted: #5B6B70; --border: #D8DDD9;
+    --accent: #2B6E63; --accent-soft: #E3ECE9;
+    --critical: #B23A32; --critical-soft: #F6E6E4;
+    --watch: #B8811F; --watch-soft: #F5EDDB;
+    --stable: #2E7D5B; --stable-soft: #E4EFE8;
   }
-
   * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--ink);
-    font-family: 'Inter', sans-serif;
-    -webkit-font-smoothing: antialiased;
-  }
-
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
   h1, h2, h3 { font-family: 'Newsreader', serif; font-weight: 500; margin: 0; }
   .mono { font-family: 'IBM Plex Mono', monospace; }
 
-  header.app-header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 20px 32px 0;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-
-  .header-top {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    max-width: 1100px;
-    margin: 0 auto 18px;
-  }
-
+  header.app-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 20px 32px 0; position: sticky; top: 0; z-index: 10; }
+  .header-top { display: flex; align-items: baseline; justify-content: space-between; max-width: 1100px; margin: 0 auto 18px; }
   .brand h1 { font-size: 22px; letter-spacing: -0.01em; }
   .brand .tagline { color: var(--ink-muted); font-size: 13px; margin-top: 2px; }
-
   .header-right { display: flex; align-items: center; gap: 18px; }
 
-  .role-switch { font-size: 13px; color: var(--ink-muted); }
-  .role-switch select {
-    font-family: 'Inter', sans-serif;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--ink);
-    padding: 6px 10px;
-    border-radius: 3px;
-    margin-left: 8px;
+  .alert-badge {
+    display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--critical);
+    background: var(--critical-soft); padding: 5px 10px; border-radius: 12px; font-weight: 500;
   }
+  .alert-badge .status-dot { background: var(--critical); }
+
+  .role-switch { font-size: 13px; color: var(--ink-muted); }
+  .role-switch select { font-family: 'Inter', sans-serif; border: 1px solid var(--border); background: var(--bg); color: var(--ink); padding: 6px 10px; border-radius: 3px; margin-left: 8px; }
 
   .sim-toggle { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-muted); }
-  .sim-toggle .switch {
-    width: 34px; height: 18px; border-radius: 10px; background: var(--border);
-    position: relative; cursor: pointer; transition: background 0.15s ease;
-  }
+  .sim-toggle .switch { width: 34px; height: 18px; border-radius: 10px; background: var(--border); position: relative; cursor: pointer; transition: background 0.15s ease; }
   .sim-toggle .switch.on { background: var(--accent); }
-  .sim-toggle .switch::after {
-    content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px;
-    border-radius: 50%; background: var(--surface); transition: left 0.15s ease;
-  }
+  .sim-toggle .switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--surface); transition: left 0.15s ease; }
   .sim-toggle .switch.on::after { left: 18px; }
   .sim-toggle.live { color: var(--accent); font-weight: 500; }
-  .pulse-dot {
-    width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
-    display: inline-block; animation: pulse 1.4s infinite ease-in-out;
-  }
+  .pulse-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; animation: pulse 1.4s infinite ease-in-out; }
+  .pulse-dot.crit { background: var(--critical); }
   @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.25;} }
 
   nav.tabs { max-width: 1100px; margin: 0 auto; display: flex; gap: 4px; }
-  nav.tabs button {
-    font-family: 'Inter', sans-serif; font-size: 14px; background: none; border: none;
-    padding: 10px 16px; color: var(--ink-muted); cursor: pointer;
-    border-bottom: 2px solid transparent; transition: color 0.15s ease;
-  }
+  nav.tabs button { font-family: 'Inter', sans-serif; font-size: 14px; background: none; border: none; padding: 10px 16px; color: var(--ink-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.15s ease; }
   nav.tabs button.active { color: var(--ink); border-bottom-color: var(--accent); font-weight: 500; }
   nav.tabs button:hover:not(.active) { color: var(--ink); }
 
   main { max-width: 1100px; margin: 0 auto; padding: 32px; }
-
   .view-heading { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; }
   .view-heading h2 { font-size: 20px; }
   .view-heading .subtext { color: var(--ink-muted); font-size: 13px; }
 
-  /* Attention strip (doctor view) */
-  .attention-strip {
-    display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
+  /* Alerts panel */
+  .alerts-panel { margin-bottom: 22px; }
+  .alerts-panel h4.section-label { margin-bottom: 10px; }
+  .alert-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    border: 1px solid var(--critical); background: var(--critical-soft);
+    padding: 12px 16px; margin-bottom: 8px; font-size: 13px;
   }
-  .attention-chip {
-    display: flex; align-items: center; gap: 8px;
-    border: 1px solid var(--border); background: var(--surface);
-    padding: 8px 14px; font-size: 13px; cursor: pointer;
+  .alert-item.watch-a { border-color: var(--watch); background: var(--watch-soft); }
+  .alert-item.escalated { border-style: dashed; box-shadow: inset 0 0 0 1px var(--critical); }
+  .alert-item .alert-main { display: flex; align-items: flex-start; gap: 10px; }
+  .alert-item .alert-icon { font-size: 15px; margin-top: 1px; }
+  .alert-item .alert-text .title { font-weight: 500; }
+  .alert-item .alert-text .meta { color: var(--ink-muted); font-size: 12px; margin-top: 2px; }
+  .alert-item .escalation-note { color: var(--critical); font-size: 12px; font-weight: 500; margin-top: 4px; }
+  .countdown { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--critical); }
+  .ack-btn {
+    background: var(--critical); color: #fff; border: none; padding: 6px 14px;
+    font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; border-radius: 2px; white-space: nowrap;
   }
+  .ack-btn:hover { background: #8f2e28; }
+  .ack-btn.watch-btn { background: var(--watch); }
+  .ack-btn.watch-btn:hover { background: #96690f; }
+  .ack-tag { font-size: 11px; color: var(--ink-muted); }
+  .no-alerts { font-size: 13px; color: var(--ink-muted); border: 1px dashed var(--border); padding: 14px 16px; background: var(--surface); }
+
+  .attention-strip { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .attention-chip { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); background: var(--surface); padding: 8px 14px; font-size: 13px; cursor: pointer; }
   .attention-chip:hover { background: var(--bg); }
   .attention-chip.crit { border-color: var(--critical); }
   .attention-chip.watch-c { border-color: var(--watch); }
@@ -118,10 +89,7 @@
   .attention-chip .reason { color: var(--ink-muted); font-size: 12px; }
 
   table.patient-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); }
-  table.patient-table th {
-    text-align: left; font-size: 12px; font-weight: 500; color: var(--ink-muted);
-    padding: 10px 16px; border-bottom: 1px solid var(--border);
-  }
+  table.patient-table th { text-align: left; font-size: 12px; font-weight: 500; color: var(--ink-muted); padding: 10px 16px; border-bottom: 1px solid var(--border); }
   table.patient-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: middle; }
   table.patient-table tr:last-child td { border-bottom: none; }
   table.patient-table tr.patient-row { cursor: pointer; }
@@ -141,13 +109,10 @@
   .vitals-inline span { color: var(--ink-muted); }
   .vitals-inline b { color: var(--ink); font-weight: 500; }
 
-  .placeholder {
-    background: var(--surface); border: 1px solid var(--border); padding: 48px 32px; text-align: center; color: var(--ink-muted);
-  }
+  .placeholder { background: var(--surface); border: 1px solid var(--border); padding: 48px 32px; text-align: center; color: var(--ink-muted); }
   .placeholder h3 { color: var(--ink); font-size: 17px; margin-bottom: 8px; }
   .placeholder p { font-size: 14px; max-width: 420px; margin: 0 auto; line-height: 1.6; }
 
-  /* Detail panel */
   .detail-panel { margin-top: 20px; background: var(--surface); border: 1px solid var(--border); }
   .detail-header { display: flex; align-items: baseline; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
   .detail-header h3 { font-size: 17px; }
@@ -161,7 +126,7 @@
 
   .vitals-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
   .vital-box { border: 1px solid var(--border); padding: 10px 12px; background: var(--bg); }
-  .vital-box .label { font-size: 11px; color: var(--ink-muted); text-transform: none; }
+  .vital-box .label { font-size: 11px; color: var(--ink-muted); }
   .vital-box .value { font-size: 18px; font-weight: 500; margin-top: 2px; }
   .vital-box.flag-critical { border-color: var(--critical); background: var(--critical-soft); }
   .vital-box.flag-watch { border-color: var(--watch); background: var(--watch-soft); }
@@ -180,15 +145,9 @@
   form.rx-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; margin-bottom: 20px; }
   form.rx-form .full { grid-column: 1 / -1; }
 
-  button.primary-btn {
-    background: var(--accent); color: #fff; border: none; padding: 8px 16px;
-    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 2px;
-  }
+  button.primary-btn { background: var(--accent); color: #fff; border: none; padding: 8px 16px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 2px; }
   button.primary-btn:hover { background: #235a51; }
-  button.secondary-btn {
-    background: none; color: var(--accent); border: 1px solid var(--accent); padding: 6px 12px;
-    font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; border-radius: 2px;
-  }
+  button.secondary-btn { background: none; color: var(--accent); border: 1px solid var(--accent); padding: 6px 12px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; border-radius: 2px; }
   button.secondary-btn:hover { background: var(--accent-soft); }
 
   .med-list { display: flex; flex-direction: column; gap: 8px; }
@@ -202,18 +161,12 @@
   .history-log { margin-top: 16px; font-size: 12px; color: var(--ink-muted); }
   .history-log .entry { padding: 4px 0; border-bottom: 1px dashed var(--border); }
 
-  /* Trend charts */
   .chart-block { margin-bottom: 18px; }
-  .chart-block .chart-title {
-    display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-muted); margin-bottom: 4px;
-  }
+  .chart-block .chart-title { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-muted); margin-bottom: 4px; }
   .chart-block .chart-title b { color: var(--ink); font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
   .chart-block svg { display: block; width: 100%; height: 56px; }
 
-  footer {
-    max-width: 1100px; margin: 0 auto; padding: 0 32px 32px; color: var(--ink-muted); font-size: 12px;
-    line-height: 1.6; border-top: 1px solid var(--border); padding-top: 16px;
-  }
+  footer { max-width: 1100px; margin: 0 auto; padding: 0 32px 32px; color: var(--ink-muted); font-size: 12px; line-height: 1.6; border-top: 1px solid var(--border); padding-top: 16px; }
 </style>
 </head>
 <body>
@@ -225,6 +178,7 @@
       <div class="tagline">One patient. One connected care system.</div>
     </div>
     <div class="header-right">
+      <div id="alertBadgeWrap"></div>
       <div class="sim-toggle" id="simToggleWrap">
         <span id="simLabel">Simulate live vitals</span>
         <div class="switch" id="simSwitch"></div>
@@ -246,7 +200,7 @@
 <main id="main"></main>
 
 <footer>
-  Vitals shown here are simulated for demonstration purposes only. AI features in later builds are intended as clinical decision-support, not autonomous diagnosis or prescription.
+  Vitals shown here are simulated for demonstration purposes only. Alert thresholds are illustrative and would need clinical validation before real-world use. AI features in later builds are intended as clinical decision-support, not autonomous diagnosis or prescription.
 </footer>
 
 <script>
@@ -303,7 +257,11 @@
   ];
 
   const statusLabels = { stable: "Stable", watch: "Watch", critical: "Alert" };
+  const doctorBackup = { "Dr. Iyer": "Dr. Menon", "Dr. Menon": "Dr. Iyer" };
+  const ESCALATION_MS = 18000; // demo-paced escalation window
   let rxCounter = 100;
+  let alertCounter = 0;
+  let alerts = []; // {id, patientId, severity, createdAt, acknowledged, escalated, escalatedTo, timerId, tickHandle}
 
   const tabsByRole = {
     nurse: [{ id: "nurse", label: "My Patients" }],
@@ -317,9 +275,7 @@
   let simulateOn = false;
   let simInterval = null;
 
-  function nowTime() {
-    return new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  }
+  function nowTime() { return new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); }
 
   function computeStatus(v) {
     if (v.spo2 < 90 || v.heartRate > 115 || v.heartRate < 50 || v.temp > 39 || v.systolic > 160) return "critical";
@@ -338,13 +294,64 @@
 
   function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
+  // ---- Alert engine ----
+  function activeAlertFor(patientId) {
+    return alerts.find(a => a.patientId === patientId && !a.acknowledged);
+  }
+
+  function createAlert(p) {
+    const existing = activeAlertFor(p.id);
+    if (existing) { existing.severity = p.status; return; } // already being tracked, just refresh severity
+    alertCounter++;
+    const alert = {
+      id: "al" + alertCounter,
+      patientId: p.id,
+      severity: p.status,
+      createdAtMs: Date.now(),
+      acknowledged: false,
+      escalated: false,
+      escalatedTo: null,
+      timerId: null
+    };
+    if (p.status === "critical") {
+      alert.timerId = setTimeout(() => escalateAlert(alert.id), ESCALATION_MS);
+    }
+    alerts.unshift(alert);
+  }
+
+  function escalateAlert(id) {
+    const a = alerts.find(x => x.id === id);
+    if (!a || a.acknowledged) return;
+    const p = getPatient(a.patientId);
+    a.escalated = true;
+    a.escalatedTo = doctorBackup[p.assignedDoctor] || "Duty Doctor";
+    renderMain();
+  }
+
+  function acknowledgeAlert(id) {
+    const a = alerts.find(x => x.id === id);
+    if (!a) return;
+    a.acknowledged = true;
+    a.acknowledgedAtMs = Date.now();
+    if (a.timerId) clearTimeout(a.timerId);
+    renderMain();
+  }
+
+  function checkAlerts(p, prevStatus) {
+    if (p.status !== "stable" && p.status !== prevStatus) {
+      createAlert(p);
+    }
+    if (p.status === "stable") {
+      const a = activeAlertFor(p.id);
+      if (a) acknowledgeAlert(a.id); // vitals normalized on their own, close it out quietly
+    }
+  }
+
   function nudgeVitals(p) {
+    const prevStatus = p.status;
     const v = p.vitals;
     const noise = () => (Math.random() - 0.5) * 2;
-    let drift = 0;
-    if (p.trend === "worsening") drift = 0.6;
-    else if (p.trend === "slow-worsening") drift = 0.25;
-    else drift = 0;
+    let drift = p.trend === "worsening" ? 0.6 : p.trend === "slow-worsening" ? 0.25 : 0;
 
     v.spo2 = clamp(+(v.spo2 - drift * 0.6 + noise() * 0.5).toFixed(0), 82, 100);
     v.heartRate = clamp(Math.round(v.heartRate + drift * 1.2 + noise() * 2), 50, 145);
@@ -356,6 +363,7 @@
 
     p.status = computeStatus(v);
     pushHistory(p);
+    checkAlerts(p, prevStatus);
   }
 
   function tickSimulation() { patients.forEach(nudgeVitals); renderMain(); }
@@ -364,18 +372,21 @@
     simulateOn = on;
     document.getElementById("simSwitch").classList.toggle("on", on);
     document.getElementById("simToggleWrap").classList.toggle("live", on);
-    document.getElementById("simLabel").innerHTML = on
-      ? '<span class="pulse-dot"></span> Live vitals streaming'
-      : 'Simulate live vitals';
+    document.getElementById("simLabel").innerHTML = on ? '<span class="pulse-dot"></span> Live vitals streaming' : 'Simulate live vitals';
     if (on) simInterval = setInterval(tickSimulation, 4000);
     else clearInterval(simInterval);
   }
 
   function renderTabs() {
     const tabs = tabsByRole[currentRole];
-    document.getElementById("tabs").innerHTML = tabs
-      .map((t, i) => `<button class="${i === 0 ? "active" : ""}" data-tab="${t.id}">${t.label}</button>`)
-      .join("");
+    document.getElementById("tabs").innerHTML = tabs.map((t, i) => `<button class="${i === 0 ? "active" : ""}" data-tab="${t.id}">${t.label}</button>`).join("");
+  }
+
+  function renderAlertBadge() {
+    const active = alerts.filter(a => !a.acknowledged);
+    const wrap = document.getElementById("alertBadgeWrap");
+    if (!active.length) { wrap.innerHTML = ""; return; }
+    wrap.innerHTML = `<div class="alert-badge"><span class="pulse-dot crit"></span>${active.length} active alert${active.length > 1 ? 's' : ''}</div>`;
   }
 
   function bp(v) { return `${v.systolic}/${v.diastolic}`; }
@@ -383,26 +394,13 @@
   function patientTable() {
     const rows = patients.map(p => `
       <tr class="patient-row ${p.id === selectedPatientId ? 'selected' : ''}" data-id="${p.id}">
-        <td class="mono">${p.id}</td>
-        <td>${p.name}</td>
-        <td>${p.bed}</td>
-        <td>${p.department}</td>
-        <td>
-          <div class="vitals-inline">
-            <span>SpO2 <b>${p.vitals.spo2}%</b></span>
-            <span>HR <b>${p.vitals.heartRate}</b></span>
-            <span>BP <b>${bp(p.vitals)}</b></span>
-          </div>
-        </td>
+        <td class="mono">${p.id}</td><td>${p.name}</td><td>${p.bed}</td><td>${p.department}</td>
+        <td><div class="vitals-inline"><span>SpO2 <b>${p.vitals.spo2}%</b></span><span>HR <b>${p.vitals.heartRate}</b></span><span>BP <b>${bp(p.vitals)}</b></span></div></td>
         <td class="status-${p.status}"><span class="status-dot"></span><span class="status-label">${statusLabels[p.status]}</span></td>
       </tr>
     `).join("");
-
     return `
-      <div class="view-heading">
-        <h2>Assigned Patients</h2>
-        <div class="subtext">${patients.length} patients · click a row for details</div>
-      </div>
+      <div class="view-heading"><h2>Assigned Patients</h2><div class="subtext">${patients.length} patients · click a row for details</div></div>
       <table class="patient-table">
         <thead><tr><th>Patient ID</th><th>Name</th><th>Bed</th><th>Department</th><th>Current Vitals</th><th>Status</th></tr></thead>
         <tbody>${rows}</tbody>
@@ -418,15 +416,47 @@
       if (p.vitals.spo2 < 94) reasons.push(`SpO2 ${p.vitals.spo2}%`);
       if (p.vitals.heartRate > 100) reasons.push(`HR ${p.vitals.heartRate}`);
       if (p.vitals.temp > 37.8) reasons.push(`Temp ${p.vitals.temp}°C`);
-      return `
-        <div class="attention-chip ${p.status === 'critical' ? 'crit' : 'watch-c'}" data-id="${p.id}">
-          <span class="status-dot status-${p.status}"></span>
-          <span class="name">${p.name}</span>
-          <span class="reason">${reasons.join(', ') || statusLabels[p.status]}</span>
-        </div>
-      `;
+      return `<div class="attention-chip ${p.status === 'critical' ? 'crit' : 'watch-c'}" data-id="${p.id}">
+        <span class="status-dot status-${p.status}"></span><span class="name">${p.name}</span><span class="reason">${reasons.join(', ') || statusLabels[p.status]}</span>
+      </div>`;
     }).join("");
     return `<div class="attention-strip">${chips}</div>`;
+  }
+
+  function alertsPanel(role) {
+    const relevant = alerts.filter(a => !a.acknowledged);
+    let html = `<div class="alerts-panel"><h4 class="section-label">Active Alerts</h4>`;
+    if (!relevant.length) {
+      html += `<div class="no-alerts">No active alerts. All monitored patients within expected ranges.</div>`;
+    } else {
+      html += relevant.map(a => {
+        const p = getPatient(a.patientId);
+        const secondsLeft = a.severity === "critical" && !a.escalated
+          ? Math.max(0, Math.ceil((a.createdAtMs + ESCALATION_MS - Date.now()) / 1000))
+          : null;
+        const escalationLine = a.escalated
+          ? `<div class="escalation-note">⚠ Not acknowledged in time — escalated to backup: ${a.escalatedTo}</div>`
+          : (secondsLeft !== null ? `<div class="countdown">Escalates to backup doctor in ${secondsLeft}s if unacknowledged</div>` : '');
+        const ackBtn = role === "doctor"
+          ? `<button class="ack-btn ${a.severity === 'watch' ? 'watch-btn' : ''}" data-ack="${a.id}">Acknowledge</button>`
+          : `<span class="ack-tag">Awaiting Dr. ${a.escalated ? a.escalatedTo.replace('Dr. ', '') : p.assignedDoctor.replace('Dr. ', '')}</span>`;
+        return `
+          <div class="alert-item ${a.severity === 'watch' ? 'watch-a' : ''} ${a.escalated ? 'escalated' : ''}">
+            <div class="alert-main">
+              <span class="alert-icon">${a.severity === 'critical' ? '🔴' : '🟡'}</span>
+              <div class="alert-text">
+                <div class="title">${p.name} — ${p.id} — ${statusLabels[a.severity]}</div>
+                <div class="meta">${p.bed} · SpO2 ${p.vitals.spo2}% · HR ${p.vitals.heartRate} · assigned ${p.assignedDoctor}</div>
+                ${escalationLine}
+              </div>
+            </div>
+            ${ackBtn}
+          </div>
+        `;
+      }).join("");
+    }
+    html += `</div>`;
+    return html;
   }
 
   function vitalBoxClass(key, v) {
@@ -447,171 +477,95 @@
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     });
     const last = pts[pts.length - 1].split(",");
-    return `
-      <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
-        <polyline points="${pts.join(' ')}" fill="none" stroke="var(${colorVar})" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-        <circle cx="${last[0]}" cy="${last[1]}" r="3" fill="var(${colorVar})"/>
-      </svg>
-    `;
+    return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+      <polyline points="${pts.join(' ')}" fill="none" stroke="var(${colorVar})" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="${last[0]}" cy="${last[1]}" r="3" fill="var(${colorVar})"/>
+    </svg>`;
   }
 
   function nurseDetailPanel(p) {
-    const vitalDefs = [
-      ["spo2", "SpO2", "%"], ["heartRate", "Heart Rate", "bpm"],
-      ["temp", "Temperature", "°C"], ["glucose", "Glucose", "mg/dL"], ["respRate", "Resp. Rate", "/min"]
-    ];
+    const vitalDefs = [["spo2", "SpO2", "%"], ["heartRate", "Heart Rate", "bpm"], ["temp", "Temperature", "°C"], ["glucose", "Glucose", "mg/dL"], ["respRate", "Resp. Rate", "/min"]];
     const vitalsBoxes = vitalDefs.map(([key, label, unit]) => `
-      <div class="vital-box ${vitalBoxClass(key, p.vitals[key])}">
-        <div class="label">${label}</div>
-        <div class="value">${p.vitals[key]}${unit === '%' ? '%' : ''} ${unit !== '%' ? `<span style="font-size:11px;color:var(--ink-muted);">${unit}</span>` : ''}</div>
+      <div class="vital-box ${vitalBoxClass(key, p.vitals[key])}"><div class="label">${label}</div><div class="value">${p.vitals[key]}${unit === '%' ? '%' : ''} ${unit !== '%' ? `<span style="font-size:11px;color:var(--ink-muted);">${unit}</span>` : ''}</div></div>
+    `).join("") + `<div class="vital-box"><div class="label">Blood Pressure</div><div class="value">${bp(p.vitals)}</div></div>`;
+
+    const medsList = p.prescriptions.length ? p.prescriptions.map(rx => `
+      <div class="med-item ${rx.status === 'administered' ? 'administered' : ''}">
+        <div><div class="med-name">${rx.medicine} <span style="color:var(--ink-muted);font-weight:400;">${rx.dose}</span></div><div class="med-meta">${rx.timing}${rx.status === 'administered' ? ' · given ' + rx.administeredAt : ''}</div></div>
+        ${rx.status === 'administered' ? `<span class="tag-administered">Administered</span>` : `<button class="secondary-btn" data-admin="${rx.id}">Mark administered</button>`}
+      </div>`).join("") : `<div style="font-size:13px;color:var(--ink-muted);">No pending medications.</div>`;
+
+    const historyEntries = [...p.history].slice(-5).reverse().map(h => `<div class="entry">${h.time} — SpO2 ${h.spo2}%, HR ${h.heartRate}, BP ${h.systolic}/${h.diastolic}, Temp ${h.temp}°C</div>`).join("");
+
+    return `<div class="detail-panel">
+      <div class="detail-header"><div><h3>${p.name} <span class="mono" style="font-size:13px;color:var(--ink-muted);">${p.id}</span></h3><div class="meta">${p.bed} · ${p.department} · Assigned: ${p.assignedNurse}</div></div><button class="close-btn" id="closeDetail">Close ✕</button></div>
+      <div class="detail-body">
+        <div class="detail-col"><h4 class="section-label">Current Vitals</h4><div class="vitals-grid">${vitalsBoxes}</div>
+          <h4 class="section-label">Log New Reading</h4>
+          <form class="vitals-form" id="vitalsForm">
+            <div><label>SpO2 (%)</label><input type="number" name="spo2" value="${p.vitals.spo2}"></div>
+            <div><label>Heart Rate (bpm)</label><input type="number" name="heartRate" value="${p.vitals.heartRate}"></div>
+            <div><label>BP Systolic</label><input type="number" name="systolic" value="${p.vitals.systolic}"></div>
+            <div><label>BP Diastolic</label><input type="number" name="diastolic" value="${p.vitals.diastolic}"></div>
+            <div><label>Temperature (°C)</label><input type="number" step="0.1" name="temp" value="${p.vitals.temp}"></div>
+            <div><label>Glucose (mg/dL)</label><input type="number" name="glucose" value="${p.vitals.glucose}"></div>
+            <div class="form-actions"><button type="submit" class="primary-btn">Save reading</button></div>
+          </form>
+          <div class="history-log">${historyEntries}</div>
+        </div>
+        <div class="detail-col"><h4 class="section-label">Medication Tasks</h4><div class="med-list">${medsList}</div></div>
       </div>
-    `).join("") + `
-      <div class="vital-box"><div class="label">Blood Pressure</div><div class="value">${bp(p.vitals)}</div></div>
-    `;
-
-    const medsList = p.prescriptions.length
-      ? p.prescriptions.map(rx => `
-        <div class="med-item ${rx.status === 'administered' ? 'administered' : ''}">
-          <div>
-            <div class="med-name">${rx.medicine} <span style="color:var(--ink-muted);font-weight:400;">${rx.dose}</span></div>
-            <div class="med-meta">${rx.timing}${rx.status === 'administered' ? ' · given ' + rx.administeredAt : ''}</div>
-          </div>
-          ${rx.status === 'administered'
-            ? `<span class="tag-administered">Administered</span>`
-            : `<button class="secondary-btn" data-admin="${rx.id}">Mark administered</button>`}
-        </div>
-      `).join("")
-      : `<div style="font-size:13px;color:var(--ink-muted);">No pending medications.</div>`;
-
-    const historyEntries = [...p.history].slice(-5).reverse().map(h => `
-      <div class="entry">${h.time} — SpO2 ${h.spo2}%, HR ${h.heartRate}, BP ${h.systolic}/${h.diastolic}, Temp ${h.temp}°C</div>
-    `).join("");
-
-    return `
-      <div class="detail-panel">
-        <div class="detail-header">
-          <div>
-            <h3>${p.name} <span class="mono" style="font-size:13px;color:var(--ink-muted);">${p.id}</span></h3>
-            <div class="meta">${p.bed} · ${p.department} · Assigned: ${p.assignedNurse}</div>
-          </div>
-          <button class="close-btn" id="closeDetail">Close ✕</button>
-        </div>
-        <div class="detail-body">
-          <div class="detail-col">
-            <h4 class="section-label">Current Vitals</h4>
-            <div class="vitals-grid">${vitalsBoxes}</div>
-            <h4 class="section-label">Log New Reading</h4>
-            <form class="vitals-form" id="vitalsForm">
-              <div><label>SpO2 (%)</label><input type="number" name="spo2" value="${p.vitals.spo2}"></div>
-              <div><label>Heart Rate (bpm)</label><input type="number" name="heartRate" value="${p.vitals.heartRate}"></div>
-              <div><label>BP Systolic</label><input type="number" name="systolic" value="${p.vitals.systolic}"></div>
-              <div><label>BP Diastolic</label><input type="number" name="diastolic" value="${p.vitals.diastolic}"></div>
-              <div><label>Temperature (°C)</label><input type="number" step="0.1" name="temp" value="${p.vitals.temp}"></div>
-              <div><label>Glucose (mg/dL)</label><input type="number" name="glucose" value="${p.vitals.glucose}"></div>
-              <div class="form-actions"><button type="submit" class="primary-btn">Save reading</button></div>
-            </form>
-            <div class="history-log">${historyEntries}</div>
-          </div>
-          <div class="detail-col">
-            <h4 class="section-label">Medication Tasks</h4>
-            <div class="med-list">${medsList}</div>
-          </div>
-        </div>
-      </div>
-    `;
+    </div>`;
   }
 
   function doctorDetailPanel(p) {
     const spo2Vals = p.history.map(h => h.spo2);
     const hrVals = p.history.map(h => h.heartRate);
-
-    const vitalDefs = [
-      ["spo2", "SpO2", "%"], ["heartRate", "Heart Rate", "bpm"],
-      ["temp", "Temperature", "°C"], ["glucose", "Glucose", "mg/dL"], ["respRate", "Resp. Rate", "/min"]
-    ];
+    const vitalDefs = [["spo2", "SpO2", "%"], ["heartRate", "Heart Rate", "bpm"], ["temp", "Temperature", "°C"], ["glucose", "Glucose", "mg/dL"], ["respRate", "Resp. Rate", "/min"]];
     const vitalsBoxes = vitalDefs.map(([key, label, unit]) => `
-      <div class="vital-box ${vitalBoxClass(key, p.vitals[key])}">
-        <div class="label">${label}</div>
-        <div class="value">${p.vitals[key]}${unit === '%' ? '%' : ''} ${unit !== '%' ? `<span style="font-size:11px;color:var(--ink-muted);">${unit}</span>` : ''}</div>
-      </div>
-    `).join("") + `
-      <div class="vital-box"><div class="label">Blood Pressure</div><div class="value">${bp(p.vitals)}</div></div>
-    `;
+      <div class="vital-box ${vitalBoxClass(key, p.vitals[key])}"><div class="label">${label}</div><div class="value">${p.vitals[key]}${unit === '%' ? '%' : ''} ${unit !== '%' ? `<span style="font-size:11px;color:var(--ink-muted);">${unit}</span>` : ''}</div></div>
+    `).join("") + `<div class="vital-box"><div class="label">Blood Pressure</div><div class="value">${bp(p.vitals)}</div></div>`;
 
-    const medsList = p.prescriptions.length
-      ? p.prescriptions.map(rx => `
-        <div class="med-item ${rx.status === 'administered' ? 'administered' : ''}">
-          <div>
-            <div class="med-name">${rx.medicine} <span style="color:var(--ink-muted);font-weight:400;">${rx.dose}</span></div>
-            <div class="med-meta">${rx.timing}</div>
-          </div>
-          ${rx.status === 'administered'
-            ? `<span class="tag-administered">Administered</span>`
-            : `<span class="tag-pending">Pending</span>`}
+    const medsList = p.prescriptions.length ? p.prescriptions.map(rx => `
+      <div class="med-item ${rx.status === 'administered' ? 'administered' : ''}">
+        <div><div class="med-name">${rx.medicine} <span style="color:var(--ink-muted);font-weight:400;">${rx.dose}</span></div><div class="med-meta">${rx.timing}</div></div>
+        ${rx.status === 'administered' ? `<span class="tag-administered">Administered</span>` : `<span class="tag-pending">Pending</span>`}
+      </div>`).join("") : `<div style="font-size:13px;color:var(--ink-muted);">No prescriptions yet.</div>`;
+
+    return `<div class="detail-panel">
+      <div class="detail-header"><div><h3>${p.name} <span class="mono" style="font-size:13px;color:var(--ink-muted);">${p.id}</span></h3><div class="meta">${p.bed} · ${p.department} · Assigned: ${p.assignedDoctor}</div></div><button class="close-btn" id="closeDetail">Close ✕</button></div>
+      <div class="detail-body">
+        <div class="detail-col"><h4 class="section-label">Current Vitals</h4><div class="vitals-grid">${vitalsBoxes}</div>
+          <h4 class="section-label">Trends</h4>
+          <div class="chart-block"><div class="chart-title">SpO2 <b>${p.vitals.spo2}%</b></div>${sparkline(spo2Vals, '--critical', 82, 100)}</div>
+          <div class="chart-block"><div class="chart-title">Heart Rate <b>${p.vitals.heartRate} bpm</b></div>${sparkline(hrVals, '--accent', 50, 145)}</div>
         </div>
-      `).join("")
-      : `<div style="font-size:13px;color:var(--ink-muted);">No prescriptions yet.</div>`;
-
-    return `
-      <div class="detail-panel">
-        <div class="detail-header">
-          <div>
-            <h3>${p.name} <span class="mono" style="font-size:13px;color:var(--ink-muted);">${p.id}</span></h3>
-            <div class="meta">${p.bed} · ${p.department} · Assigned: ${p.assignedDoctor}</div>
-          </div>
-          <button class="close-btn" id="closeDetail">Close ✕</button>
-        </div>
-        <div class="detail-body">
-          <div class="detail-col">
-            <h4 class="section-label">Current Vitals</h4>
-            <div class="vitals-grid">${vitalsBoxes}</div>
-
-            <h4 class="section-label">Trends</h4>
-            <div class="chart-block">
-              <div class="chart-title">SpO2 <b>${p.vitals.spo2}%</b></div>
-              ${sparkline(spo2Vals, '--critical', 82, 100)}
-            </div>
-            <div class="chart-block">
-              <div class="chart-title">Heart Rate <b>${p.vitals.heartRate} bpm</b></div>
-              ${sparkline(hrVals, '--accent', 50, 145)}
-            </div>
-          </div>
-          <div class="detail-col">
-            <h4 class="section-label">Prescribe Medicine</h4>
-            <form class="rx-form" id="rxForm">
-              <div class="full"><label>Medicine name</label><input type="text" name="medicine" placeholder="e.g. Amoxicillin" required></div>
-              <div><label>Dose</label><input type="text" name="dose" placeholder="e.g. 500mg" required></div>
-              <div><label>Timing</label><input type="text" name="timing" placeholder="e.g. 9:00 AM" required></div>
-              <div class="form-actions"><button type="submit" class="primary-btn">Add prescription</button></div>
-            </form>
-            <h4 class="section-label">Prescriptions</h4>
-            <div class="med-list">${medsList}</div>
-          </div>
+        <div class="detail-col"><h4 class="section-label">Prescribe Medicine</h4>
+          <form class="rx-form" id="rxForm">
+            <div class="full"><label>Medicine name</label><input type="text" name="medicine" placeholder="e.g. Amoxicillin" required></div>
+            <div><label>Dose</label><input type="text" name="dose" placeholder="e.g. 500mg" required></div>
+            <div><label>Timing</label><input type="text" name="timing" placeholder="e.g. 9:00 AM" required></div>
+            <div class="form-actions"><button type="submit" class="primary-btn">Add prescription</button></div>
+          </form>
+          <h4 class="section-label">Prescriptions</h4><div class="med-list">${medsList}</div>
         </div>
       </div>
-    `;
+    </div>`;
   }
 
-  function placeholder(title, body) {
-    return `<div class="placeholder"><h3>${title}</h3><p>${body}</p></div>`;
-  }
+  function placeholder(title, body) { return `<div class="placeholder"><h3>${title}</h3><p>${body}</p></div>`; }
 
   function renderMain() {
+    renderAlertBadge();
     const main = document.getElementById("main");
     if (currentRole === "nurse") {
-      let html = patientTable();
-      if (selectedPatientId) {
-        const p = getPatient(selectedPatientId);
-        if (p) html += nurseDetailPanel(p);
-      }
+      let html = alertsPanel("nurse") + patientTable();
+      if (selectedPatientId) { const p = getPatient(selectedPatientId); if (p) html += nurseDetailPanel(p); }
       main.innerHTML = html;
       attachNurseHandlers();
     } else if (currentRole === "doctor") {
-      let html = attentionStrip() + patientTable();
-      if (selectedPatientId) {
-        const p = getPatient(selectedPatientId);
-        if (p) html += doctorDetailPanel(p);
-      }
+      let html = alertsPanel("doctor") + attentionStrip() + patientTable();
+      if (selectedPatientId) { const p = getPatient(selectedPatientId); if (p) html += doctorDetailPanel(p); }
       main.innerHTML = html;
       attachDoctorHandlers();
     } else if (currentRole === "pharmacy") {
@@ -623,21 +577,22 @@
 
   function attachRowSelectHandlers() {
     document.querySelectorAll("tr.patient-row").forEach(row => {
-      row.addEventListener("click", () => {
-        selectedPatientId = row.dataset.id === selectedPatientId ? null : row.dataset.id;
-        renderMain();
-      });
+      row.addEventListener("click", () => { selectedPatientId = row.dataset.id === selectedPatientId ? null : row.dataset.id; renderMain(); });
     });
     document.querySelectorAll(".attention-chip").forEach(chip => {
-      chip.addEventListener("click", () => {
-        selectedPatientId = chip.dataset.id;
-        renderMain();
-      });
+      chip.addEventListener("click", () => { selectedPatientId = chip.dataset.id; renderMain(); });
+    });
+  }
+
+  function attachAckHandlers() {
+    document.querySelectorAll("[data-ack]").forEach(btn => {
+      btn.addEventListener("click", () => acknowledgeAlert(btn.dataset.ack));
     });
   }
 
   function attachNurseHandlers() {
     attachRowSelectHandlers();
+    attachAckHandlers();
     const closeBtn = document.getElementById("closeDetail");
     if (closeBtn) closeBtn.addEventListener("click", () => { selectedPatientId = null; renderMain(); });
 
@@ -646,6 +601,7 @@
       form.addEventListener("submit", (e) => {
         e.preventDefault();
         const p = getPatient(selectedPatientId);
+        const prevStatus = p.status;
         const fd = new FormData(form);
         p.vitals.spo2 = clamp(+fd.get("spo2"), 60, 100);
         p.vitals.heartRate = clamp(+fd.get("heartRate"), 30, 200);
@@ -655,10 +611,10 @@
         p.vitals.glucose = clamp(+fd.get("glucose"), 40, 400);
         p.status = computeStatus(p.vitals);
         pushHistory(p);
+        checkAlerts(p, prevStatus);
         renderMain();
       });
     }
-
     document.querySelectorAll("[data-admin]").forEach(btn => {
       btn.addEventListener("click", () => {
         const p = getPatient(selectedPatientId);
@@ -672,6 +628,7 @@
 
   function attachDoctorHandlers() {
     attachRowSelectHandlers();
+    attachAckHandlers();
     const closeBtn = document.getElementById("closeDetail");
     if (closeBtn) closeBtn.addEventListener("click", () => { selectedPatientId = null; renderMain(); });
 
@@ -682,26 +639,19 @@
         const p = getPatient(selectedPatientId);
         const fd = new FormData(rxForm);
         rxCounter++;
-        p.prescriptions.unshift({
-          id: "rx" + rxCounter,
-          medicine: fd.get("medicine"),
-          dose: fd.get("dose"),
-          timing: fd.get("timing"),
-          status: "pending"
-        });
+        p.prescriptions.unshift({ id: "rx" + rxCounter, medicine: fd.get("medicine"), dose: fd.get("dose"), timing: fd.get("timing"), status: "pending" });
         renderMain();
       });
     }
   }
 
   document.getElementById("roleSelect").addEventListener("change", (e) => {
-    currentRole = e.target.value;
-    selectedPatientId = null;
-    renderTabs();
-    renderMain();
+    currentRole = e.target.value; selectedPatientId = null; renderTabs(); renderMain();
   });
-
   document.getElementById("simSwitch").addEventListener("click", () => setSimulate(!simulateOn));
+
+  // ticking clock for live countdown display even when sim is off
+  setInterval(() => { if (alerts.some(a => !a.acknowledged && !a.escalated && a.severity === 'critical')) renderMain(); }, 1000);
 
   renderTabs();
   renderMain();
