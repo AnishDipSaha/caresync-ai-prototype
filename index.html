@@ -193,6 +193,24 @@
   table.stock-table th { text-align: left; font-size: 12px; font-weight: 500; color: var(--ink-muted); padding: 8px 14px; border-bottom: 1px solid var(--border); }
   table.stock-table td { padding: 9px 14px; border-bottom: 1px solid var(--border); font-size: 13px; }
   table.stock-table tr:last-child td { border-bottom: none; }
+
+  /* AI Summary */
+  .ai-summary-block { margin-bottom: 20px; }
+  .ai-summary-card {
+    background: var(--accent-soft); border: 1px solid var(--accent); padding: 14px 16px; margin-top: 10px; font-size: 13px; line-height: 1.65;
+  }
+  .ai-summary-card .ai-label {
+    display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px;
+  }
+  .ai-summary-card .ai-disclaimer { font-size: 11px; color: var(--ink-muted); margin-top: 10px; font-style: italic; }
+  .ai-generate-btn {
+    background: var(--accent); color: #fff; border: none; padding: 8px 16px;
+    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 2px;
+  }
+  .ai-generate-btn:hover { background: #235a51; }
+  .ai-generate-btn:disabled { background: var(--border); cursor: default; }
+  .ai-loading { font-size: 13px; color: var(--ink-muted); font-style: italic; margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -418,6 +436,67 @@
 
   function tickSimulation() { patients.forEach(nudgeVitals); renderMain(); }
 
+  // ---- Rule-based AI patient summary generator ----
+  function trendPhrase(values, unit, label, lowerIsWorse) {
+    if (values.length < 2) return null;
+    const first = values[0], last = values[values.length - 1];
+    const diff = last - first;
+    if (Math.abs(diff) < (unit === '°C' ? 0.15 : 1.5)) return null;
+    const worsening = lowerIsWorse ? diff < 0 : diff > 0;
+    const verb = diff > 0 ? "risen" : "declined";
+    return { text: `${label} has ${verb} from ${first}${unit} to ${last}${unit}`, worsening };
+  }
+
+  function generateAISummary(p) {
+    const spo2Vals = p.history.map(h => h.spo2);
+    const hrVals = p.history.map(h => h.heartRate);
+    const tempVals = p.history.map(h => h.temp);
+
+    const trends = [
+      trendPhrase(spo2Vals, '%', 'SpO2', true),
+      trendPhrase(hrVals, ' bpm', 'Heart rate', false),
+      trendPhrase(tempVals, '°C', 'Temperature', false)
+    ].filter(Boolean);
+
+    const worseningCount = trends.filter(t => t.worsening).length;
+    const sentences = [];
+
+    sentences.push(`Patient admitted under ${p.department}, currently ${statusLabels[p.status].toLowerCase()} on the monitoring dashboard (${p.bed}).`);
+
+    if (trends.length) {
+      sentences.push(trends.map(t => t.text).join(", ") + " over the recorded observation window.");
+    } else {
+      sentences.push("Vitals have remained broadly steady over the recorded observation window.");
+    }
+
+    if (worseningCount >= 2) {
+      sentences.push("The combined pattern across multiple parameters suggests a potential deterioration trend that may warrant closer review.");
+    } else if (worseningCount === 1) {
+      sentences.push("One monitored parameter shows a notable trend that may be worth confirming with a fresh reading.");
+    }
+
+    const pendingRx = p.prescriptions.filter(r => r.status !== "administered");
+    if (pendingRx.length) {
+      sentences.push(`Current medication plan includes ${pendingRx.map(r => r.medicine).join(", ")}, with administration status tracked in the nursing record.`);
+    }
+
+    sentences.push("This summary is generated from recorded vitals and medication data to support clinical review — it is not a diagnosis and does not replace direct patient assessment.");
+
+    return sentences.join(" ");
+  }
+
+  let summaryState = {}; // patientId -> { loading, text }
+
+  function requestAISummary(patientId) {
+    summaryState[patientId] = { loading: true, text: null };
+    renderMain();
+    setTimeout(() => {
+      const p = getPatient(patientId);
+      summaryState[patientId] = { loading: false, text: generateAISummary(p) };
+      renderMain();
+    }, 650);
+  }
+
   // ---- Pharmacy actions ----
   function findPrescription(rxId) {
     for (const p of patients) {
@@ -626,6 +705,21 @@
       </div>`;
     }).join("") : `<div style="font-size:13px;color:var(--ink-muted);">No prescriptions yet.</div>`;
 
+    const sState = summaryState[p.id];
+    let aiBlock = `<div class="ai-summary-block">
+      <h4 class="section-label">AI Patient Summary</h4>
+      <button class="ai-generate-btn" id="genSummaryBtn" ${sState && sState.loading ? 'disabled' : ''}>${sState && sState.loading ? 'Analyzing…' : 'Generate AI Summary'}</button>`;
+    if (sState && sState.loading) {
+      aiBlock += `<div class="ai-loading">Reviewing vitals history and medication record…</div>`;
+    } else if (sState && sState.text) {
+      aiBlock += `<div class="ai-summary-card">
+        <div class="ai-label">✦ AI-generated summary</div>
+        ${sState.text}
+        <div class="ai-disclaimer">Decision-support only. Diagnosis, prescription, and clinical action remain the responsibility of the treating physician.</div>
+      </div>`;
+    }
+    aiBlock += `</div>`;
+
     return `<div class="detail-panel">
       <div class="detail-header"><div><h3>${p.name} <span class="mono" style="font-size:13px;color:var(--ink-muted);">${p.id}</span></h3><div class="meta">${p.bed} · ${p.department} · Assigned: ${p.assignedDoctor}</div></div><button class="close-btn" id="closeDetail">Close ✕</button></div>
       <div class="detail-body">
@@ -633,6 +727,7 @@
           <h4 class="section-label">Trends</h4>
           <div class="chart-block"><div class="chart-title">SpO2 <b>${p.vitals.spo2}%</b></div>${sparkline(spo2Vals, '--critical', 82, 100)}</div>
           <div class="chart-block"><div class="chart-title">Heart Rate <b>${p.vitals.heartRate} bpm</b></div>${sparkline(hrVals, '--accent', 50, 145)}</div>
+          ${aiBlock}
         </div>
         <div class="detail-col"><h4 class="section-label">Prescribe Medicine</h4>
           <form class="rx-form" id="rxForm">
@@ -778,6 +873,9 @@
     attachAckHandlers();
     const closeBtn = document.getElementById("closeDetail");
     if (closeBtn) closeBtn.addEventListener("click", () => { selectedPatientId = null; renderMain(); });
+
+    const genBtn = document.getElementById("genSummaryBtn");
+    if (genBtn) genBtn.addEventListener("click", () => requestAISummary(selectedPatientId));
 
     const rxForm = document.getElementById("rxForm");
     if (rxForm) {
