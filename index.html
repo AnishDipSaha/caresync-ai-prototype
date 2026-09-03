@@ -858,11 +858,39 @@
       return `<div class="activity-row"><span>${p.name} — ${statusLabels[a.severity]}</span><span class="act-meta">${statusText}</span></div>`;
     }).join("") || `<div class="activity-row"><span>No alert activity recorded yet.</span></div>`;
 
+    const byDoctor = {};
+    patients.forEach(p => { (byDoctor[p.assignedDoctor] = byDoctor[p.assignedDoctor] || []).push(p); });
+    const doctorAssignments = Object.entries(byDoctor).map(([doctor, list]) => {
+      const rows = list.map(p => `
+        <tr>
+          <td class="mono">${p.id}</td>
+          <td>${p.name}</td>
+          <td>${p.bed}</td>
+          <td>${p.department}</td>
+          <td class="status-${p.status}"><span class="status-dot"></span><span class="status-label">${statusLabels[p.status]}</span></td>
+        </tr>
+      `).join("");
+      const critCount = list.filter(p => p.status !== 'stable').length;
+      return `
+        <div style="margin-bottom:18px;">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+            <div style="font-weight:500;font-size:14px;">${doctor}</div>
+            <div style="font-size:12px;color:var(--ink-muted);">${list.length} patient${list.length === 1 ? '' : 's'}${critCount ? ` · ${critCount} need attention` : ''} · backup: ${doctorBackup[doctor] || '—'}</div>
+          </div>
+          <table class="stock-table">
+            <thead><tr><th>Patient ID</th><th>Name</th><th>Bed</th><th>Department</th><th>Status</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      `;
+    }).join("");
+
     return `
       <div class="view-heading"><h2>Hospital Overview</h2><div class="subtext">live, computed from current patient and pharmacy data</div></div>
       ${metrics}
       ${statusBars}
       ${deptBars}
+      <div class="admin-section"><h4 class="section-label">Doctor Assignments</h4>${doctorAssignments}</div>
       <div class="admin-section"><h4 class="section-label">Recent Alert Activity</h4><div class="activity-log">${recentActivity}</div></div>
     `;
   }
