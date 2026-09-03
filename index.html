@@ -307,6 +307,8 @@
       assignedDoctor: "Dr. Iyer", assignedNurse: "Nurse Fernandes", trend: "worsening",
       vitals: { spo2: 89, heartRate: 108, systolic: 152, diastolic: 96, temp: 38.2, glucose: 178, respRate: 22 },
       history: [],
+      admittedDays: 4, paidAmount: 5000,
+      investigations: [{ label: "ECG", amount: 800 }, { label: "Cardiac Enzyme Panel", amount: 1400 }],
       prescriptions: [
         { id: "rx1", medicine: "Furosemide", dose: "20mg", timing: "8:00 AM", status: "pending" },
         { id: "rx2", medicine: "Metoprolol", dose: "25mg", timing: "8:00 AM", status: "administered", administeredAt: "8:04 AM" }
@@ -317,6 +319,8 @@
       assignedDoctor: "Dr. Menon", assignedNurse: "Nurse Fernandes", trend: "stable",
       vitals: { spo2: 97, heartRate: 78, systolic: 118, diastolic: 76, temp: 37.0, glucose: 96, respRate: 16 },
       history: [],
+      admittedDays: 2, paidAmount: 3000,
+      investigations: [{ label: "Blood Panel", amount: 500 }],
       prescriptions: [ { id: "rx3", medicine: "Paracetamol", dose: "650mg", timing: "2:00 PM", status: "pending" } ]
     },
     {
@@ -324,6 +328,8 @@
       assignedDoctor: "Dr. Iyer", assignedNurse: "Nurse Ali", trend: "slow-worsening",
       vitals: { spo2: 93, heartRate: 96, systolic: 138, diastolic: 88, temp: 37.6, glucose: 142, respRate: 20 },
       history: [],
+      admittedDays: 3, paidAmount: 2000,
+      investigations: [{ label: "Chest X-ray", amount: 600 }, { label: "Sputum Culture", amount: 450 }],
       prescriptions: [
         { id: "rx4", medicine: "Salbutamol Inhaler", dose: "2 puffs", timing: "12:00 PM", status: "pending" },
         { id: "rx5", medicine: "Azithromycin", dose: "500mg", timing: "9:00 AM", status: "administered", administeredAt: "9:10 AM" }
@@ -334,6 +340,8 @@
       assignedDoctor: "Dr. Menon", assignedNurse: "Nurse Ali", trend: "stable",
       vitals: { spo2: 98, heartRate: 72, systolic: 122, diastolic: 80, temp: 36.9, glucose: 101, respRate: 15 },
       history: [],
+      admittedDays: 1, paidAmount: 0,
+      investigations: [{ label: "X-ray — Orthopedic", amount: 700 }],
       prescriptions: [ { id: "rx6", medicine: "Ibuprofen", dose: "400mg", timing: "1:00 PM", status: "pending" } ]
     },
     {
@@ -341,6 +349,8 @@
       assignedDoctor: "Dr. Iyer", assignedNurse: "Nurse Fernandes", trend: "slow-worsening",
       vitals: { spo2: 94, heartRate: 101, systolic: 145, diastolic: 90, temp: 37.9, glucose: 165, respRate: 19 },
       history: [],
+      admittedDays: 3, paidAmount: 6000,
+      investigations: [{ label: "ECG", amount: 800 }, { label: "Echocardiogram", amount: 2200 }],
       prescriptions: [ { id: "rx7", medicine: "Atorvastatin", dose: "20mg", timing: "9:00 PM", status: "pending" } ]
     },
     {
@@ -348,6 +358,8 @@
       assignedDoctor: "Dr. Menon", assignedNurse: "Nurse Ali", trend: "stable",
       vitals: { spo2: 99, heartRate: 68, systolic: 114, diastolic: 74, temp: 36.7, glucose: 92, respRate: 14 },
       history: [],
+      admittedDays: 1, paidAmount: 1500,
+      investigations: [{ label: "Blood Panel", amount: 500 }],
       prescriptions: []
     }
   ];
@@ -378,6 +390,38 @@
     }
     return medicineStock[medicineName];
   }
+
+  // ---- Billing ----
+  const ROOM_RATE = { ICU: 8000, Ward: 3000 };
+  const CONSULTATION_RATE_PER_DAY = 500;
+  const medicinePrices = {
+    "Furosemide": 40, "Metoprolol": 25, "Paracetamol": 10, "Salbutamol Inhaler": 180,
+    "Azithromycin": 90, "Ibuprofen": 15, "Atorvastatin": 60
+  };
+  function medicinePrice(name) { return medicinePrices[name] || 50; }
+  function roomRateFor(bed) { return bed.startsWith("ICU") ? ROOM_RATE.ICU : ROOM_RATE.Ward; }
+
+  function computeBilling(p) {
+    const roomCharge = roomRateFor(p.bed) * p.admittedDays;
+    const consultationCharge = CONSULTATION_RATE_PER_DAY * p.admittedDays;
+    const investigationCharge = p.investigations.reduce((s, i) => s + i.amount, 0);
+    const pharmacyItems = p.prescriptions.filter(r => r.status !== "pending");
+    const pharmacyCharge = pharmacyItems.reduce((s, r) => s + medicinePrice(r.medicine), 0);
+    const total = roomCharge + consultationCharge + investigationCharge + pharmacyCharge;
+    const paid = p.paidAmount;
+    const outstanding = Math.max(0, total - paid);
+    return { roomCharge, consultationCharge, investigationCharge, pharmacyCharge, pharmacyItems, total, paid, outstanding };
+  }
+
+  function payBill(patientId) {
+    const p = getPatient(patientId);
+    const b = computeBilling(p);
+    p.paidAmount = b.total;
+    p.lastPaymentAt = nowTime();
+    renderMain();
+  }
+
+  function inr(n) { return "₹" + Math.round(n).toLocaleString('en-IN'); }
   const ESCALATION_MS = 18000; // demo-paced escalation window
   let rxCounter = 100;
   let alertCounter = 0;
@@ -819,6 +863,12 @@
     const rxDispensed = allRx.filter(r => r.status === "dispensed").length;
     const rxAdministered = allRx.filter(r => r.status === "administered").length;
 
+    const billTotals = patients.reduce((acc, p) => {
+      const b = computeBilling(p);
+      acc.revenue += b.total; acc.collected += b.paid; acc.outstanding += b.outstanding;
+      return acc;
+    }, { revenue: 0, collected: 0, outstanding: 0 });
+
     const deptCounts = {};
     patients.forEach(p => { deptCounts[p.department] = (deptCounts[p.department] || 0) + 1; });
     const maxDept = Math.max(...Object.values(deptCounts), 1);
@@ -831,6 +881,9 @@
         <div class="metric-card"><div class="metric-label">Pharmacy Stock-outs</div><div class="metric-value ${stockOuts ? 'crit' : ''}">${stockOuts}</div><div class="metric-sub">of ${Object.keys(medicineStock).length} tracked medicines</div></div>
         <div class="metric-card"><div class="metric-label">Prescriptions Awaiting Pharmacy</div><div class="metric-value">${rxAwaiting}</div><div class="metric-sub">${rxDispensed} dispensed · ${rxAdministered} administered</div></div>
         <div class="metric-card"><div class="metric-label">Total Patients Monitored</div><div class="metric-value">${total}</div><div class="metric-sub">across ${Object.keys(deptCounts).length} departments</div></div>
+        <div class="metric-card"><div class="metric-label">Total Revenue Billed</div><div class="metric-value">${inr(billTotals.revenue)}</div><div class="metric-sub">across ${total} active patients</div></div>
+        <div class="metric-card"><div class="metric-label">Collected</div><div class="metric-value">${inr(billTotals.collected)}</div><div class="metric-sub">${Math.round((billTotals.collected / billTotals.revenue) * 100) || 0}% of billed revenue</div></div>
+        <div class="metric-card"><div class="metric-label">Outstanding</div><div class="metric-value ${billTotals.outstanding ? 'crit' : ''}">${inr(billTotals.outstanding)}</div><div class="metric-sub">pending patient payment</div></div>
       </div>
     `;
 
@@ -912,6 +965,41 @@
         <span class="${rx.status === 'administered' ? 'tag-administered' : rx.status === 'dispensed' ? 'tag-dispensed' : 'tag-awaiting'}">${rx.status === 'administered' ? 'Given' : rx.status === 'dispensed' ? 'Ready' : 'Pending'}</span>
       </div>`).join("") : `<div style="font-size:13px;color:var(--ink-muted);">No medications currently prescribed.</div>`;
 
+    const bill = computeBilling(p);
+    const pharmacyLines = bill.pharmacyItems.map(r => `<div class="stock-row"><span class="src-name">${r.medicine} (${r.dose})</span><span>${inr(medicinePrice(r.medicine))}</span></div>`).join("")
+      || `<div class="stock-row"><span class="src-name">No dispensed medicines billed yet</span><span>${inr(0)}</span></div>`;
+    const investigationLines = p.investigations.map(i => `<div class="stock-row"><span class="src-name">${i.label}</span><span>${inr(i.amount)}</span></div>`).join("");
+
+    const billingSection = `
+      <div class="patient-section">
+        <h4 class="section-label">My Bills</h4>
+        <div class="metric-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px;">
+          <div class="metric-card"><div class="metric-label">Total Billed</div><div class="metric-value" style="font-size:22px;">${inr(bill.total)}</div></div>
+          <div class="metric-card"><div class="metric-label">Paid</div><div class="metric-value" style="font-size:22px;">${inr(bill.paid)}</div></div>
+          <div class="metric-card"><div class="metric-label">Outstanding</div><div class="metric-value ${bill.outstanding > 0 ? 'crit' : ''}" style="font-size:22px;">${inr(bill.outstanding)}</div></div>
+        </div>
+        <div class="rx-request">
+          <div class="rx-top"><span class="med-line">Room Charges</span><span class="patient-line">${p.bed.startsWith('ICU') ? 'ICU' : 'Ward'} · ${p.admittedDays} day(s)</span></div>
+          <div class="stock-row"><span class="src-name">${inr(roomRateFor(p.bed))} / day</span><span>${inr(bill.roomCharge)}</span></div>
+        </div>
+        <div class="rx-request">
+          <div class="rx-top"><span class="med-line">Doctor Consultation</span><span class="patient-line">${p.admittedDays} day(s)</span></div>
+          <div class="stock-row"><span class="src-name">${inr(CONSULTATION_RATE_PER_DAY)} / day</span><span>${inr(bill.consultationCharge)}</span></div>
+        </div>
+        <div class="rx-request">
+          <div class="rx-top"><span class="med-line">Investigations</span><span class="patient-line">${p.investigations.length} item(s)</span></div>
+          ${investigationLines}
+        </div>
+        <div class="rx-request">
+          <div class="rx-top"><span class="med-line">Pharmacy Charges</span><span class="patient-line">dispensed/administered only</span></div>
+          ${pharmacyLines}
+        </div>
+        ${bill.outstanding > 0
+          ? `<button class="primary-btn" id="payBillBtn">Pay ${inr(bill.outstanding)} now</button>`
+          : `<span class="tag-administered">Paid in full${p.lastPaymentAt ? ' · ' + p.lastPaymentAt : ''}</span>`}
+      </div>
+    `;
+
     return `
       <div class="patient-select-bar">Previewing patient portal as: <select id="patientPreviewSelect">${options}</select></div>
       <div class="patient-hero">
@@ -922,7 +1010,7 @@
       </div>
       <div class="patient-section"><h4 class="section-label">My Medicines</h4><div class="med-list">${meds}</div></div>
       <div class="patient-section"><h4 class="section-label">My Diet Plan</h4><div class="placeholder" style="padding:24px;"><p style="margin:0;">Nutrition and diet plans are part of a future phase of CareSync AI.</p></div></div>
-      <div class="patient-section"><h4 class="section-label">My Bills</h4><div class="placeholder" style="padding:24px;"><p style="margin:0;">Billing and payment tracking are part of a future phase of CareSync AI.</p></div></div>
+      ${billingSection}
     `;
   }
 
@@ -1000,6 +1088,8 @@
       main.innerHTML = patientPortalView();
       const sel = document.getElementById("patientPreviewSelect");
       if (sel) sel.addEventListener("change", (e) => { viewingPatientId = e.target.value; renderMain(); });
+      const payBtn = document.getElementById("payBillBtn");
+      if (payBtn) payBtn.addEventListener("click", () => payBill(viewingPatientId));
     }
   }
 
