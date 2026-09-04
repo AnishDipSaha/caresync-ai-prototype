@@ -262,6 +262,71 @@
   .patient-hero .ph-status { margin-top: 12px; font-size: 13px; }
   .friendly-note { font-size: 13px; color: var(--ink-muted); line-height: 1.6; margin-top: 10px; }
   .patient-section { margin-bottom: 22px; }
+
+  /* Session bar (post-login header) */
+  .session-bar { display: flex; align-items: center; gap: 14px; font-size: 13px; color: var(--ink-muted); }
+  .session-bar .who { color: var(--ink); font-weight: 500; }
+  .session-bar .who .role-tag { color: var(--ink-muted); font-weight: 400; }
+  .logout-btn {
+    background: none; border: 1px solid var(--border); color: var(--ink-muted); padding: 6px 12px;
+    font-family: 'Inter', sans-serif; font-size: 12px; cursor: pointer; border-radius: 2px;
+  }
+  .logout-btn:hover { color: var(--ink); border-color: var(--ink-muted); }
+
+  /* Login screen */
+  .login-wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px; }
+  .login-wrap h2 { font-size: 24px; margin-bottom: 6px; }
+  .login-wrap .login-sub { color: var(--ink-muted); font-size: 13px; margin-bottom: 6px; }
+  .login-notice {
+    font-size: 12px; color: var(--watch); background: var(--watch-soft); border: 1px solid var(--watch);
+    padding: 10px 14px; margin: 14px 0 28px;
+  }
+  .login-group { margin-bottom: 28px; }
+  .login-group h4.section-label { margin-bottom: 10px; }
+  .staff-card {
+    display: flex; align-items: center; justify-content: space-between; background: var(--surface);
+    border: 1px solid var(--border); padding: 12px 16px; margin-bottom: 8px;
+  }
+  .staff-card .staff-name { font-weight: 500; font-size: 14px; }
+  .staff-card .staff-sub { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+  .staff-card .staff-actions { display: flex; align-items: center; gap: 10px; }
+  .avail-toggle {
+    display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; user-select: none;
+  }
+  .avail-toggle .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .avail-toggle.avail .dot { background: var(--stable); }
+  .avail-toggle.unavail .dot { background: var(--critical); }
+  .login-btn {
+    background: var(--accent); color: #fff; border: none; padding: 7px 14px;
+    font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; border-radius: 2px;
+  }
+  .login-btn:hover { background: #235a51; }
+  .login-btn:disabled { background: var(--border); color: var(--ink-muted); cursor: not-allowed; }
+  .patient-login-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .coverage-banner {
+    font-size: 12px; color: var(--watch); background: var(--watch-soft); border: 1px solid var(--watch);
+    padding: 8px 14px; margin-bottom: 12px;
+  }
+
+  /* Login category chooser */
+  .role-tile-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 6px; }
+  .role-tile {
+    background: var(--surface); border: 1px solid var(--border); padding: 22px 14px; text-align: center;
+    cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .role-tile:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .role-tile .role-tile-name { font-family: 'Newsreader', serif; font-size: 17px; margin-bottom: 4px; }
+  .role-tile .role-tile-sub { font-size: 11px; color: var(--ink-muted); }
+  .back-link {
+    background: none; border: none; color: var(--accent); font-family: 'Inter', sans-serif; font-size: 13px;
+    cursor: pointer; padding: 0; margin-bottom: 18px; display: inline-flex; align-items: center; gap: 4px;
+  }
+  .back-link:hover { text-decoration: underline; }
+
+  @media (max-width: 720px) {
+    .role-tile-grid { grid-template-columns: repeat(2, 1fr); }
+  }
 </style>
 </head>
 <body>
@@ -272,23 +337,7 @@
       <h1>CareSync AI</h1>
       <div class="tagline">One patient. One connected care system.</div>
     </div>
-    <div class="header-right">
-      <div id="alertBadgeWrap"></div>
-      <div class="sim-toggle" id="simToggleWrap">
-        <span id="simLabel">Simulate live vitals</span>
-        <div class="switch" id="simSwitch"></div>
-      </div>
-      <div class="role-switch">
-        Viewing as
-        <select id="roleSelect">
-          <option value="nurse">Nurse</option>
-          <option value="doctor">Doctor</option>
-          <option value="pharmacy">Pharmacy</option>
-          <option value="admin">Admin</option>
-          <option value="patient">Patient</option>
-        </select>
-      </div>
-    </div>
+    <div class="header-right" id="headerRight"></div>
   </div>
   <nav class="tabs" id="tabs"></nav>
 </header>
@@ -296,7 +345,7 @@
 <main id="main"></main>
 
 <footer>
-  CareSync AI — prototype build. Patient data, vitals, and pharmacy stock shown here are simulated for demonstration purposes. The AI summary feature uses rule-based analysis of recorded data, not a live clinical model. All AI and automated features are intended as decision-support tools only — diagnosis, prescription, and clinical action remain the responsibility of licensed healthcare professionals.
+  CareSync AI — prototype build. Patient data, vitals, and pharmacy stock shown here are simulated for demonstration purposes. Login shown here simulates role-based access for demo purposes only — there is no real backend authentication, and page source remains viewable. The AI summary feature uses rule-based analysis of recorded data, not a live clinical model. All AI and automated features are intended as decision-support tools only — diagnosis, prescription, and clinical action remain the responsibility of licensed healthcare professionals.
 </footer>
 
 <script>
@@ -366,6 +415,11 @@
 
   const statusLabels = { stable: "Stable", watch: "Watch", critical: "Alert" };
   const doctorBackup = { "Dr. Iyer": "Dr. Menon", "Dr. Menon": "Dr. Iyer" };
+  const nurseBackup = { "Nurse Fernandes": "Nurse Ali", "Nurse Ali": "Nurse Fernandes" };
+  const nurseRoster = [
+    { name: "Nurse Fernandes", available: true },
+    { name: "Nurse Ali", available: true }
+  ];
   const partnerPharmacyNames = ["Apollo Pharmacy", "MedPlus", "Wellness Forever"];
   const medicineStock = {
     "Furosemide": { hospital: 0, partners: { "Apollo Pharmacy": 15, "MedPlus": 0, "Wellness Forever": 7 } },
@@ -441,10 +495,12 @@
 
   let currentRole = "nurse";
   let selectedPatientId = null;
-  let viewingPatientId = "CS-10250"; // default patient-portal preview (stable patient, less alarming for demo)
+  let viewingPatientId = "CS-10250";
   let adminSubTab = "overview";
   let simulateOn = false;
   let simInterval = null;
+  let loggedInUser = null; // { role, name } — null means showing login screen
+  let loginCategory = null; // which role tile was picked on the login screen (null = chooser view)
   const TOTAL_BEDS = 10;
 
   function nowTime() { return new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); }
@@ -658,17 +714,159 @@
     });
   }
 
-  function renderAlertBadge() {
+  function renderHeaderRight() {
+    const wrap = document.getElementById("headerRight");
     const active = alerts.filter(a => !a.acknowledged);
-    const wrap = document.getElementById("alertBadgeWrap");
-    if (!active.length) { wrap.innerHTML = ""; return; }
-    wrap.innerHTML = `<div class="alert-badge"><span class="pulse-dot crit"></span>${active.length} active alert${active.length > 1 ? 's' : ''}</div>`;
+    const badgeHtml = active.length ? `<div class="alert-badge"><span class="pulse-dot crit"></span>${active.length} active alert${active.length > 1 ? 's' : ''}</div>` : "";
+
+    if (!loggedInUser) {
+      wrap.innerHTML = badgeHtml;
+      return;
+    }
+
+    const roleLabel = { nurse: "Nurse", doctor: "Doctor", pharmacy: "Pharmacy", admin: "Admin", patient: "Patient" }[loggedInUser.role];
+    const displayName = loggedInUser.role === "patient" ? (getPatient(loggedInUser.name)?.name || loggedInUser.name) : loggedInUser.name;
+    wrap.innerHTML = `
+      ${badgeHtml}
+      <div class="sim-toggle" id="simToggleWrap">
+        <span id="simLabel">${simulateOn ? '<span class="pulse-dot"></span> Live vitals streaming' : 'Simulate live vitals'}</span>
+        <div class="switch ${simulateOn ? 'on' : ''}" id="simSwitch"></div>
+      </div>
+      <div class="session-bar">
+        <span class="who">${displayName} <span class="role-tag">(${roleLabel})</span></span>
+        <button class="logout-btn" id="logoutBtn">Log out</button>
+      </div>
+    `;
+    document.getElementById("simSwitch").addEventListener("click", () => setSimulate(!simulateOn));
+    document.getElementById("logoutBtn").addEventListener("click", logout);
+  }
+
+  function login(role, name) {
+    loggedInUser = { role, name };
+    selectedPatientId = null;
+    adminSubTab = "overview";
+    renderMain();
+  }
+
+  function logout() {
+    loggedInUser = null;
+    loginCategory = null;
+    selectedPatientId = null;
+    renderMain();
+  }
+
+  function toggleNurseAvailability(name) {
+    const n = nurseRoster.find(x => x.name === name);
+    n.available = !n.available;
+    renderMain();
+  }
+
+  function toggleDoctorAvailability(name) {
+    const d = doctorRoster.find(x => x.name === name);
+    d.available = !d.available;
+    renderMain();
+  }
+
+  function renderLoginScreen() {
+    if (!loginCategory) {
+      return `
+        <div class="login-wrap">
+          <h2>Sign in to CareSync AI</h2>
+          <div class="login-sub">Select your role to continue.</div>
+          <div class="login-notice">This is a simulated login for demo purposes — there is no real password authentication or backend, and the page source remains fully viewable. It demonstrates role-based access behavior only.</div>
+          <div class="role-tile-grid">
+            <div class="role-tile" data-category="nurse"><div class="role-tile-name">Nurse</div><div class="role-tile-sub">Assigned patients & tasks</div></div>
+            <div class="role-tile" data-category="doctor"><div class="role-tile-name">Doctor</div><div class="role-tile-sub">Patients, alerts & prescribing</div></div>
+            <div class="role-tile" data-category="patient"><div class="role-tile-name">Patient</div><div class="role-tile-sub">My health & bills</div></div>
+            <div class="role-tile" data-category="pharmacy"><div class="role-tile-name">Pharmacy</div><div class="role-tile-sub">Requests & stock</div></div>
+            <div class="role-tile" data-category="admin"><div class="role-tile-name">Admin</div><div class="role-tile-sub">Hospital overview</div></div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (loginCategory === "nurse") {
+      const nurseCards = nurseRoster.map(n => `
+        <div class="staff-card">
+          <div><div class="staff-name">${n.name}</div><div class="staff-sub">Ward nursing staff</div></div>
+          <div class="staff-actions">
+            <span class="avail-toggle ${n.available ? 'avail' : 'unavail'}" data-toggle-nurse="${n.name}"><span class="dot"></span>${n.available ? 'Available' : 'Unavailable'} — toggle</span>
+            <button class="login-btn" data-login-nurse="${n.name}">Log in</button>
+          </div>
+        </div>
+      `).join("");
+      return `
+        <div class="login-wrap">
+          <button class="back-link" id="loginBack">← Back</button>
+          <h2>Nurse Login</h2>
+          <div class="login-sub" style="margin-bottom:20px;">Select which nurse you are.</div>
+          ${nurseCards}
+          <div style="font-size:11px;color:var(--ink-muted);margin-top:10px;">Toggle a nurse "Unavailable" before logging in as their backup to see coverage in action.</div>
+        </div>
+      `;
+    }
+
+    if (loginCategory === "doctor") {
+      const doctorCards = doctorRoster.map(d => `
+        <div class="staff-card">
+          <div><div class="staff-name">${d.name}</div><div class="staff-sub">${d.specialty}</div></div>
+          <div class="staff-actions">
+            <span class="avail-toggle ${d.available ? 'avail' : 'unavail'}" data-toggle-doctor="${d.name}"><span class="dot"></span>${d.available ? 'Available' : 'Unavailable'} — toggle</span>
+            <button class="login-btn" data-login-doctor="${d.name}">Log in</button>
+          </div>
+        </div>
+      `).join("");
+      return `
+        <div class="login-wrap">
+          <button class="back-link" id="loginBack">← Back</button>
+          <h2>Doctor Login</h2>
+          <div class="login-sub" style="margin-bottom:20px;">Select which doctor you are.</div>
+          ${doctorCards}
+          <div style="font-size:11px;color:var(--ink-muted);margin-top:10px;">Toggle a doctor "Unavailable" before logging in as their backup to see coverage and escalations in action.</div>
+        </div>
+      `;
+    }
+
+    if (loginCategory === "patient") {
+      const patientCards = patients.map(p => `<button class="login-btn" style="width:100%;text-align:left;padding:12px 14px;" data-login-patient="${p.id}">${p.name} <span style="opacity:0.75;">(${p.id})</span></button>`).join("");
+      return `
+        <div class="login-wrap">
+          <button class="back-link" id="loginBack">← Back</button>
+          <h2>Patient Login</h2>
+          <div class="login-sub" style="margin-bottom:20px;">Select which patient's record to view.</div>
+          <div class="patient-login-grid">${patientCards}</div>
+        </div>
+      `;
+    }
+  }
+
+  function attachLoginHandlers() {
+    document.querySelectorAll("[data-category]").forEach(tile => {
+      tile.addEventListener("click", () => {
+        const cat = tile.dataset.category;
+        if (cat === "pharmacy") { login("pharmacy", "Pharmacy Staff"); return; }
+        if (cat === "admin") { login("admin", "Hospital Admin"); return; }
+        loginCategory = cat;
+        renderMain();
+      });
+    });
+    const backBtn = document.getElementById("loginBack");
+    if (backBtn) backBtn.addEventListener("click", () => { loginCategory = null; renderMain(); });
+
+    document.querySelectorAll("[data-login-nurse]").forEach(btn => btn.addEventListener("click", () => login("nurse", btn.dataset.loginNurse)));
+    document.querySelectorAll("[data-login-doctor]").forEach(btn => btn.addEventListener("click", () => login("doctor", btn.dataset.loginDoctor)));
+    document.querySelectorAll("[data-login-patient]").forEach(btn => btn.addEventListener("click", () => login("patient", btn.dataset.loginPatient)));
+    document.querySelectorAll("[data-toggle-nurse]").forEach(el => el.addEventListener("click", (e) => { e.stopPropagation(); toggleNurseAvailability(el.dataset.toggleNurse); }));
+    document.querySelectorAll("[data-toggle-doctor]").forEach(el => el.addEventListener("click", (e) => { e.stopPropagation(); toggleDoctorAvailability(el.dataset.toggleDoctor); }));
   }
 
   function bp(v) { return `${v.systolic}/${v.diastolic}`; }
 
-  function patientTable() {
-    const rows = patients.map(p => `
+  function patientTable(list, heading) {
+    list = list || patients;
+    heading = heading || "Assigned Patients";
+    if (!list.length) return `<div class="no-alerts">No patients in this list.</div>`;
+    const rows = list.map(p => `
       <tr class="patient-row ${p.id === selectedPatientId ? 'selected' : ''}" data-id="${p.id}">
         <td class="mono">${p.id}</td><td>${p.name}</td><td>${p.bed}</td><td>${p.department}</td>
         <td><div class="vitals-inline"><span>SpO2 <b>${p.vitals.spo2}%</b></span><span>HR <b>${p.vitals.heartRate}</b></span><span>BP <b>${bp(p.vitals)}</b></span></div></td>
@@ -676,7 +874,7 @@
       </tr>
     `).join("");
     return `
-      <div class="view-heading"><h2>Assigned Patients</h2><div class="subtext">${patients.length} patients · click a row for details</div></div>
+      <div class="view-heading"><h2>${heading}</h2><div class="subtext">${list.length} patient${list.length === 1 ? '' : 's'} · click a row for details</div></div>
       <table class="patient-table">
         <thead><tr><th>Patient ID</th><th>Name</th><th>Bed</th><th>Department</th><th>Current Vitals</th><th>Status</th></tr></thead>
         <tbody>${rows}</tbody>
@@ -684,8 +882,9 @@
     `;
   }
 
-  function attentionStrip() {
-    const flagged = patients.filter(p => p.status !== "stable");
+  function attentionStrip(list) {
+    list = list || patients;
+    const flagged = list.filter(p => p.status !== "stable");
     if (!flagged.length) return "";
     const chips = flagged.map(p => {
       const reasons = [];
@@ -699,8 +898,9 @@
     return `<div class="attention-strip">${chips}</div>`;
   }
 
-  function alertsPanel(role) {
-    const relevant = alerts.filter(a => !a.acknowledged);
+  function alertsPanel(role, allowedPatientIds) {
+    let relevant = alerts.filter(a => !a.acknowledged);
+    if (allowedPatientIds) relevant = relevant.filter(a => allowedPatientIds.has(a.patientId));
     let html = `<div class="alerts-panel"><h4 class="section-label">Active Alerts</h4>`;
     if (!relevant.length) {
       html += `<div class="no-alerts">No active alerts. All monitored patients within expected ranges.</div>`;
@@ -861,11 +1061,11 @@
   // ---- Admin Overview ----
   const doctorRoster = [
     {
-      name: "Dr. Iyer", specialty: "Cardiology & Pulmonology",
+      name: "Dr. Iyer", specialty: "Cardiology & Pulmonology", available: true,
       schedule: { Mon: "9:00 AM – 5:00 PM", Tue: "9:00 AM – 5:00 PM", Wed: "9:00 AM – 5:00 PM", Thu: "Off", Fri: "9:00 AM – 5:00 PM", Sat: "9:00 AM – 1:00 PM", Sun: "On-call" }
     },
     {
-      name: "Dr. Menon", specialty: "General Medicine & Orthopedics",
+      name: "Dr. Menon", specialty: "General Medicine & Orthopedics", available: true,
       schedule: { Mon: "10:00 AM – 6:00 PM", Tue: "10:00 AM – 6:00 PM", Wed: "Off", Thu: "10:00 AM – 6:00 PM", Fri: "10:00 AM – 6:00 PM", Sat: "On-call", Sun: "Off" }
     }
   ];
@@ -1032,7 +1232,6 @@
   // ---- Patient Portal ----
   function patientPortalView() {
     const p = getPatient(viewingPatientId);
-    const options = patients.map(pt => `<option value="${pt.id}" ${pt.id === viewingPatientId ? 'selected' : ''}>${pt.name} (${pt.id})</option>`).join("");
 
     const friendlyStatus = {
       stable: "Your readings are within the expected range. Your care team will continue routine monitoring.",
@@ -1082,7 +1281,6 @@
     `;
 
     return `
-      <div class="patient-select-bar">Previewing patient portal as: <select id="patientPreviewSelect">${options}</select></div>
       <div class="patient-hero">
         <h2>Hello, ${p.name.split(' ').slice(-1)}</h2>
         <div class="ph-meta">${p.bed} · ${p.department} · Under care of ${p.assignedDoctor}</div>
@@ -1148,27 +1346,57 @@
   }
 
   function renderMain() {
-    renderAlertBadge();
+    renderHeaderRight();
     const main = document.getElementById("main");
+
+    if (!loggedInUser) {
+      document.getElementById("tabs").innerHTML = "";
+      main.innerHTML = renderLoginScreen();
+      attachLoginHandlers();
+      return;
+    }
+
+    currentRole = loggedInUser.role;
+    renderTabs();
+
     if (currentRole === "nurse") {
-      let html = alertsPanel("nurse") + patientTable();
-      if (selectedPatientId) { const p = getPatient(selectedPatientId); if (p) html += nurseDetailPanel(p); }
+      const myName = loggedInUser.name;
+      const myPatients = patients.filter(p => p.assignedNurse === myName);
+      const coveringFor = nurseRoster.filter(n => !n.available && nurseBackup[n.name] === myName).map(n => n.name);
+      const coveragePatients = patients.filter(p => coveringFor.includes(p.assignedNurse));
+      const allowedIds = new Set([...myPatients, ...coveragePatients].map(p => p.id));
+
+      let html = "";
+      if (coveringFor.length) html += `<div class="coverage-banner">⚠ Covering for ${coveringFor.join(", ")} (marked unavailable) — their patients and alerts are included below.</div>`;
+      html += alertsPanel("nurse", allowedIds) + patientTable(myPatients, "My Patients");
+      if (coveragePatients.length) html += patientTable(coveragePatients, `Covering — ${coveringFor.join(", ")}`);
+      if (selectedPatientId) { const p = getPatient(selectedPatientId); if (p && allowedIds.has(p.id)) html += nurseDetailPanel(p); }
       main.innerHTML = html;
       attachNurseHandlers();
+
     } else if (currentRole === "doctor") {
-      let html = alertsPanel("doctor") + attentionStrip() + patientTable();
-      if (selectedPatientId) { const p = getPatient(selectedPatientId); if (p) html += doctorDetailPanel(p); }
+      const myName = loggedInUser.name;
+      const myPatients = patients.filter(p => p.assignedDoctor === myName);
+      const coveringFor = doctorRoster.filter(d => !d.available && doctorBackup[d.name] === myName).map(d => d.name);
+      const coveragePatients = patients.filter(p => coveringFor.includes(p.assignedDoctor));
+      const allowedIds = new Set([...myPatients, ...coveragePatients].map(p => p.id));
+
+      let html = "";
+      if (coveringFor.length) html += `<div class="coverage-banner">⚠ Covering for ${coveringFor.join(", ")} (marked unavailable) — their patients and alerts are included below.</div>`;
+      html += alertsPanel("doctor", allowedIds) + attentionStrip(myPatients.concat(coveragePatients)) + patientTable(myPatients, "My Patients");
+      if (coveragePatients.length) html += patientTable(coveragePatients, `Covering — ${coveringFor.join(", ")}`);
+      if (selectedPatientId) { const p = getPatient(selectedPatientId); if (p && allowedIds.has(p.id)) html += doctorDetailPanel(p); }
       main.innerHTML = html;
       attachDoctorHandlers();
+
     } else if (currentRole === "pharmacy") {
       main.innerHTML = pharmacyView();
       attachPharmacyHandlers();
     } else if (currentRole === "admin") {
       main.innerHTML = adminView();
     } else if (currentRole === "patient") {
+      viewingPatientId = loggedInUser.name;
       main.innerHTML = patientPortalView();
-      const sel = document.getElementById("patientPreviewSelect");
-      if (sel) sel.addEventListener("change", (e) => { viewingPatientId = e.target.value; renderMain(); });
       const payBtn = document.getElementById("payBillBtn");
       if (payBtn) payBtn.addEventListener("click", () => payBill(viewingPatientId));
     }
@@ -1256,15 +1484,9 @@
     });
   }
 
-  document.getElementById("roleSelect").addEventListener("change", (e) => {
-    currentRole = e.target.value; selectedPatientId = null; renderTabs(); renderMain();
-  });
-  document.getElementById("simSwitch").addEventListener("click", () => setSimulate(!simulateOn));
-
   // ticking clock for live countdown display even when sim is off
   setInterval(() => { if (alerts.some(a => !a.acknowledged && !a.escalated && a.severity === 'critical')) renderMain(); }, 1000);
 
-  renderTabs();
   renderMain();
 </script>
 
