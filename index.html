@@ -724,10 +724,18 @@
       return;
     }
 
+    let pharmacyBadgeHtml = "";
+    if (loggedInUser.role === "pharmacy") {
+      let pendingCount = 0;
+      patients.forEach(p => p.prescriptions.forEach(rx => { if (rx.status === "pending") pendingCount++; }));
+      if (pendingCount) pharmacyBadgeHtml = `<div class="alert-badge" style="color:var(--watch);background:var(--watch-soft);"><span class="pulse-dot" style="background:var(--watch);"></span>${pendingCount} new prescription${pendingCount > 1 ? 's' : ''}</div>`;
+    }
+
     const roleLabel = { nurse: "Nurse", doctor: "Doctor", pharmacy: "Pharmacy", admin: "Admin", patient: "Patient" }[loggedInUser.role];
     const displayName = loggedInUser.role === "patient" ? (getPatient(loggedInUser.name)?.name || loggedInUser.name) : loggedInUser.name;
     wrap.innerHTML = `
       ${badgeHtml}
+      ${pharmacyBadgeHtml}
       <div class="sim-toggle" id="simToggleWrap">
         <span id="simLabel">${simulateOn ? '<span class="pulse-dot"></span> Live vitals streaming' : 'Simulate live vitals'}</span>
         <div class="switch ${simulateOn ? 'on' : ''}" id="simSwitch"></div>
@@ -1318,9 +1326,14 @@
         }).join("");
         body = `<div class="hospital-out-note">✕ Not available at Hospital Pharmacy — checking partner network</div>${partnerRows}`;
       }
-      return `<div class="rx-request">
-        <div class="rx-top"><span class="med-line">${rx.medicine} <span style="color:var(--ink-muted);font-weight:400;">${rx.dose}</span></span><span class="patient-line">${p.name} · ${p.id} · ${rx.timing}</span></div>
-        ${body}
+      return `<div class="alert-item watch-a" style="align-items:flex-start;flex-direction:column;gap:10px;">
+        <div class="alert-main" style="width:100%;justify-content:space-between;display:flex;">
+          <div class="alert-text">
+            <div class="title">${rx.medicine} <span style="font-weight:400;color:var(--ink-muted);">${rx.dose}</span></div>
+            <div class="meta">Patient: ${p.name} (${p.id}) · <strong style="color:var(--ink);">Bed ${p.bed}</strong> · Prescribed by ${p.assignedDoctor} · ${rx.timing}</div>
+          </div>
+        </div>
+        <div style="width:100%;">${body}</div>
       </div>`;
     }).join("");
   }
@@ -1338,7 +1351,7 @@
 
   function pharmacyView() {
     return `
-      <div class="view-heading"><h2>Prescription Requests</h2><div class="subtext">awaiting dispense or procurement</div></div>
+      <div class="view-heading"><h2>Incoming Prescription Alerts</h2><div class="subtext">sent automatically the moment a doctor prescribes</div></div>
       ${pharmacyRequests()}
       <div class="view-heading" style="margin-top:32px;"><h2>Hospital Pharmacy Stock</h2><div class="subtext">${Object.keys(medicineStock).length} medicines tracked</div></div>
       ${pharmacyStockTable()}
