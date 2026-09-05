@@ -285,7 +285,7 @@
   .login-group h4.section-label { margin-bottom: 10px; }
   .staff-card {
     display: flex; align-items: center; justify-content: space-between; background: var(--surface);
-    border: 1px solid var(--border); padding: 12px 16px; margin-bottom: 8px;
+    border: 1px solid var(--border); border-left: 3px solid var(--accent-ink); padding: 12px 16px; margin-bottom: 8px;
   }
   .staff-card .staff-name { font-weight: 500; font-size: 14px; }
   .staff-card .staff-sub { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
@@ -297,10 +297,10 @@
   .avail-toggle.avail .dot { background: var(--stable); }
   .avail-toggle.unavail .dot { background: var(--critical); }
   .login-btn {
-    background: var(--accent); color: #fff; border: none; padding: 7px 14px;
+    background: var(--accent); color: var(--accent-text); border: none; padding: 7px 14px;
     font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; border-radius: 2px;
   }
-  .login-btn:hover { background: #235a51; }
+  .login-btn:hover { filter: brightness(0.92); }
   .login-btn:disabled { background: var(--border); color: var(--ink-muted); cursor: not-allowed; }
   .patient-login-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
@@ -420,7 +420,7 @@
     doctor:   { accent: "#2B6E63", soft: "#E3ECE9", text: "#FFFFFF", ink: "#2B6E63" }, // Green / Teal
     nurse:    { accent: "#8E7CC3", soft: "#EFEBFA", text: "#FFFFFF", ink: "#7A67B0" }, // Soft Purple / Lilac
     pharmacy: { accent: "#F4F4F2", soft: "#FAFAF9", text: "#17242B", ink: "#6B7076" }, // White / neutral
-    patient:  { accent: "#6FA8DC", soft: "#E8F1FB", text: "#FFFFFF", ink: "#3E7CA6" }, // Light Blue
+    patient:  { accent: "#7FA8C4", soft: "#EAF2F8", text: "#FFFFFF", ink: "#5C86A3" }, // Light Blue (muted)
     admin:    { accent: "#8A8F98", soft: "#EEEFF1", text: "#FFFFFF", ink: "#6B7076" }  // Grey
   };
   const DEFAULT_THEME = { accent: "#2B6E63", soft: "#E3ECE9", text: "#FFFFFF", ink: "#2B6E63" };
@@ -878,11 +878,12 @@
         if (cat === "pharmacy") { login("pharmacy", "Pharmacy Staff"); return; }
         if (cat === "admin") { login("admin", "Hospital Admin"); return; }
         loginCategory = cat;
+        applyRoleTheme(cat);
         renderMain();
       });
     });
     const backBtn = document.getElementById("loginBack");
-    if (backBtn) backBtn.addEventListener("click", () => { loginCategory = null; renderMain(); });
+    if (backBtn) backBtn.addEventListener("click", () => { loginCategory = null; resetTheme(); renderMain(); });
 
     document.querySelectorAll("[data-login-nurse]").forEach(btn => btn.addEventListener("click", () => login("nurse", btn.dataset.loginNurse)));
     document.querySelectorAll("[data-login-doctor]").forEach(btn => btn.addEventListener("click", () => login("doctor", btn.dataset.loginDoctor)));
