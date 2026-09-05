@@ -9,7 +9,7 @@
 <style>
   :root {
     --bg: #EFF2EF; --surface: #FFFFFF; --ink: #17242B; --ink-muted: #5B6B70; --border: #D8DDD9;
-    --accent: #2B6E63; --accent-soft: #E3ECE9;
+    --accent: #2B6E63; --accent-soft: #E3ECE9; --accent-text: #FFFFFF; --accent-ink: #2B6E63;
     --critical: #B23A32; --critical-soft: #F6E6E4;
     --watch: #B8811F; --watch-soft: #F5EDDB;
     --stable: #2E7D5B; --stable-soft: #E4EFE8;
@@ -46,7 +46,7 @@
 
   nav.tabs { max-width: 1100px; margin: 0 auto; display: flex; gap: 4px; }
   nav.tabs button { font-family: 'Inter', sans-serif; font-size: 14px; background: none; border: none; padding: 10px 16px; color: var(--ink-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.15s ease; }
-  nav.tabs button.active { color: var(--ink); border-bottom-color: var(--accent); font-weight: 500; }
+  nav.tabs button.active { color: var(--ink); border-bottom-color: var(--accent-ink); font-weight: 500; }
   nav.tabs button:hover:not(.active) { color: var(--ink); }
 
   main { max-width: 1100px; margin: 0 auto; padding: 32px; }
@@ -145,9 +145,9 @@
   form.rx-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; margin-bottom: 20px; }
   form.rx-form .full { grid-column: 1 / -1; }
 
-  button.primary-btn { background: var(--accent); color: #fff; border: none; padding: 8px 16px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 2px; }
-  button.primary-btn:hover { background: #235a51; }
-  button.secondary-btn { background: none; color: var(--accent); border: 1px solid var(--accent); padding: 6px 12px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; border-radius: 2px; }
+  button.primary-btn { background: var(--accent); color: var(--accent-text); border: none; padding: 8px 16px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 2px; }
+  button.primary-btn:hover { filter: brightness(0.92); }
+  button.secondary-btn { background: none; color: var(--accent-ink); border: 1px solid var(--accent-ink); padding: 6px 12px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; border-radius: 2px; }
   button.secondary-btn:hover { background: var(--accent-soft); }
 
   .med-list { display: flex; flex-direction: column; gap: 8px; }
@@ -194,12 +194,12 @@
   .stock-available { color: var(--stable); font-weight: 500; }
   .stock-out { color: var(--critical); font-weight: 500; }
   .procure-btn {
-    background: none; border: 1px solid var(--accent); color: var(--accent); padding: 5px 12px;
+    background: none; border: 1px solid var(--accent-ink); color: var(--accent-ink); padding: 5px 12px;
     font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; border-radius: 2px;
   }
   .procure-btn:hover { background: var(--accent-soft); }
   .hospital-out-note { color: var(--critical); font-size: 12px; font-weight: 500; margin-bottom: 6px; }
-  .tag-dispensed { font-size: 11px; color: var(--accent); background: var(--accent-soft); padding: 2px 8px; border-radius: 10px; }
+  .tag-dispensed { font-size: 11px; color: var(--accent-ink); background: var(--accent-soft); padding: 2px 8px; border-radius: 10px; }
   .tag-awaiting { font-size: 11px; color: var(--ink-muted); background: var(--bg); padding: 2px 8px; border-radius: 10px; }
   .procured-note { font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
 
@@ -211,18 +211,18 @@
   /* AI Summary */
   .ai-summary-block { margin-bottom: 20px; }
   .ai-summary-card {
-    background: var(--accent-soft); border: 1px solid var(--accent); padding: 14px 16px; margin-top: 10px; font-size: 13px; line-height: 1.65;
+    background: var(--accent-soft); border: 1px solid var(--accent-ink); padding: 14px 16px; margin-top: 10px; font-size: 13px; line-height: 1.65;
   }
   .ai-summary-card .ai-label {
-    display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--accent);
+    display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--accent-ink);
     text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px;
   }
   .ai-summary-card .ai-disclaimer { font-size: 11px; color: var(--ink-muted); margin-top: 10px; font-style: italic; }
   .ai-generate-btn {
-    background: var(--accent); color: #fff; border: none; padding: 8px 16px;
+    background: var(--accent); color: var(--accent-text); border: none; padding: 8px 16px;
     font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 2px;
   }
-  .ai-generate-btn:hover { background: #235a51; }
+  .ai-generate-btn:hover { filter: brightness(0.92); }
   .ai-generate-btn:disabled { background: var(--border); cursor: default; }
   .ai-loading { font-size: 13px; color: var(--ink-muted); font-style: italic; margin-top: 10px; }
 
@@ -414,6 +414,27 @@
   ];
 
   const statusLabels = { stable: "Stable", watch: "Watch", critical: "Alert" };
+
+  // ---- Role color themes ----
+  const roleThemes = {
+    doctor:   { accent: "#2B6E63", soft: "#E3ECE9", text: "#FFFFFF", ink: "#2B6E63" }, // Green / Teal
+    nurse:    { accent: "#8E7CC3", soft: "#EFEBFA", text: "#FFFFFF", ink: "#7A67B0" }, // Soft Purple / Lilac
+    pharmacy: { accent: "#F4F4F2", soft: "#FAFAF9", text: "#17242B", ink: "#6B7076" }, // White / neutral
+    patient:  { accent: "#6FA8DC", soft: "#E8F1FB", text: "#FFFFFF", ink: "#3E7CA6" }, // Light Blue
+    admin:    { accent: "#8A8F98", soft: "#EEEFF1", text: "#FFFFFF", ink: "#6B7076" }  // Grey
+  };
+  const DEFAULT_THEME = { accent: "#2B6E63", soft: "#E3ECE9", text: "#FFFFFF", ink: "#2B6E63" };
+
+  function applyRoleTheme(role) {
+    const t = roleThemes[role] || DEFAULT_THEME;
+    const s = document.documentElement.style;
+    s.setProperty("--accent", t.accent);
+    s.setProperty("--accent-soft", t.soft);
+    s.setProperty("--accent-text", t.text);
+    s.setProperty("--accent-ink", t.ink);
+  }
+
+  function resetTheme() { applyRoleTheme(null); }
   const doctorBackup = { "Dr. Iyer": "Dr. Menon", "Dr. Menon": "Dr. Iyer" };
   const nurseBackup = { "Nurse Fernandes": "Nurse Ali", "Nurse Ali": "Nurse Fernandes" };
   const nurseRoster = [
@@ -753,6 +774,7 @@
     loggedInUser = { role, name };
     selectedPatientId = null;
     adminSubTab = "overview";
+    applyRoleTheme(role);
     renderMain();
   }
 
@@ -760,6 +782,7 @@
     loggedInUser = null;
     loginCategory = null;
     selectedPatientId = null;
+    resetTheme();
     renderMain();
   }
 
@@ -783,11 +806,11 @@
           <div class="login-sub">Select your role to continue.</div>
           <div class="login-notice">This is a simulated login for demo purposes — there is no real password authentication or backend, and the page source remains fully viewable. It demonstrates role-based access behavior only.</div>
           <div class="role-tile-grid">
-            <div class="role-tile" data-category="nurse"><div class="role-tile-name">Nurse</div><div class="role-tile-sub">Assigned patients & tasks</div></div>
-            <div class="role-tile" data-category="doctor"><div class="role-tile-name">Doctor</div><div class="role-tile-sub">Patients, alerts & prescribing</div></div>
-            <div class="role-tile" data-category="patient"><div class="role-tile-name">Patient</div><div class="role-tile-sub">My health & bills</div></div>
-            <div class="role-tile" data-category="pharmacy"><div class="role-tile-name">Pharmacy</div><div class="role-tile-sub">Requests & stock</div></div>
-            <div class="role-tile" data-category="admin"><div class="role-tile-name">Admin</div><div class="role-tile-sub">Hospital overview</div></div>
+            <div class="role-tile" data-category="nurse" style="border-top:3px solid ${roleThemes.nurse.accent};"><div class="role-tile-name">Nurse</div><div class="role-tile-sub">Assigned patients & tasks</div></div>
+            <div class="role-tile" data-category="doctor" style="border-top:3px solid ${roleThemes.doctor.accent};"><div class="role-tile-name">Doctor</div><div class="role-tile-sub">Patients, alerts & prescribing</div></div>
+            <div class="role-tile" data-category="patient" style="border-top:3px solid ${roleThemes.patient.accent};"><div class="role-tile-name">Patient</div><div class="role-tile-sub">My health & bills</div></div>
+            <div class="role-tile" data-category="pharmacy" style="border-top:3px solid ${roleThemes.pharmacy.ink};"><div class="role-tile-name">Pharmacy</div><div class="role-tile-sub">Requests & stock</div></div>
+            <div class="role-tile" data-category="admin" style="border-top:3px solid ${roleThemes.admin.accent};"><div class="role-tile-name">Admin</div><div class="role-tile-sub">Hospital overview</div></div>
           </div>
         </div>
       `;
