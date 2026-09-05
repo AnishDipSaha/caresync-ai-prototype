@@ -435,7 +435,12 @@
   }
 
   function resetTheme() { applyRoleTheme(null); }
-  const doctorBackup = { "Dr. Iyer": "Dr. Menon", "Dr. Menon": "Dr. Iyer" };
+  const doctorBackup = {
+    "Dr. Iyer": "Dr. Menon", "Dr. Menon": "Dr. Iyer",
+    "Dr. Rao": "Dr. Kapoor", "Dr. Kapoor": "Dr. Rao",
+    "Dr. Nair": "Dr. Bhatt", "Dr. Bhatt": "Dr. Nair",
+    "Dr. Sen": "Dr. Menon"
+  };
   const nurseBackup = { "Nurse Fernandes": "Nurse Ali", "Nurse Ali": "Nurse Fernandes" };
   const nurseRoster = [
     { name: "Nurse Fernandes", available: true },
@@ -518,6 +523,7 @@
   let selectedPatientId = null;
   let viewingPatientId = "CS-10250";
   let adminSubTab = "overview";
+  let doctorsDrill = { view: "departments", department: null, doctorName: null };
   let simulateOn = false;
   let simInterval = null;
   let loggedInUser = null; // { role, name } — null means showing login screen
@@ -728,6 +734,7 @@
       btn.addEventListener("click", () => {
         if (currentRole === "admin") {
           adminSubTab = btn.dataset.tab;
+          if (adminSubTab === "doctors") doctorsDrill = { view: "departments", department: null, doctorName: null };
           renderTabs();
           renderMain();
         }
@@ -1093,15 +1100,62 @@
   // ---- Admin Overview ----
   const doctorRoster = [
     {
-      name: "Dr. Iyer", specialty: "Cardiology & Pulmonology", available: true,
-      schedule: { Mon: "9:00 AM – 5:00 PM", Tue: "9:00 AM – 5:00 PM", Wed: "9:00 AM – 5:00 PM", Thu: "Off", Fri: "9:00 AM – 5:00 PM", Sat: "9:00 AM – 1:00 PM", Sun: "On-call" }
+      name: "Dr. Iyer", specialty: "Cardiologist", department: "Cardiology", room: "201", available: true,
+      hours: { Mon: { start: 9, end: 17 }, Tue: { start: 9, end: 17 }, Wed: { start: 9, end: 17 }, Thu: null, Fri: { start: 9, end: 17 }, Sat: { start: 9, end: 13 }, Sun: "on-call" }
     },
     {
-      name: "Dr. Menon", specialty: "General Medicine & Orthopedics", available: true,
-      schedule: { Mon: "10:00 AM – 6:00 PM", Tue: "10:00 AM – 6:00 PM", Wed: "Off", Thu: "10:00 AM – 6:00 PM", Fri: "10:00 AM – 6:00 PM", Sat: "On-call", Sun: "Off" }
+      name: "Dr. Menon", specialty: "General Physician", department: "General Medicine", room: "108", available: true,
+      hours: { Mon: { start: 10, end: 18 }, Tue: { start: 10, end: 18 }, Wed: null, Thu: { start: 10, end: 18 }, Fri: { start: 10, end: 18 }, Sat: "on-call", Sun: null }
+    },
+    {
+      name: "Dr. Rao", specialty: "Pulmonologist", department: "Pulmonology", room: "210", available: true,
+      hours: { Mon: { start: 9, end: 14 }, Tue: { start: 9, end: 14 }, Wed: { start: 9, end: 14 }, Thu: { start: 9, end: 14 }, Fri: { start: 9, end: 14 }, Sat: null, Sun: null }
+    },
+    {
+      name: "Dr. Kapoor", specialty: "Orthopedic Surgeon", department: "Orthopedics", room: "112", available: true,
+      hours: { Mon: { start: 11, end: 17 }, Tue: null, Wed: { start: 11, end: 17 }, Thu: { start: 11, end: 17 }, Fri: null, Sat: { start: 9, end: 13 }, Sun: "on-call" }
+    },
+    {
+      name: "Dr. Nair", specialty: "Neurologist", department: "Neurology", room: "305", available: true,
+      hours: { Mon: { start: 9, end: 15 }, Tue: { start: 9, end: 15 }, Wed: null, Thu: { start: 9, end: 15 }, Fri: { start: 9, end: 15 }, Sat: null, Sun: null }
+    },
+    {
+      name: "Dr. Bhatt", specialty: "Dermatologist", department: "Dermatology", room: "118", available: true,
+      hours: { Mon: null, Tue: { start: 12, end: 18 }, Wed: { start: 12, end: 18 }, Thu: { start: 12, end: 18 }, Fri: { start: 12, end: 18 }, Sat: { start: 10, end: 14 }, Sun: null }
+    },
+    {
+      name: "Dr. Sen", specialty: "Pediatrician", department: "Pediatrics", room: "220", available: true,
+      hours: { Mon: { start: 9, end: 16 }, Tue: { start: 9, end: 16 }, Wed: { start: 9, end: 16 }, Thu: null, Fri: { start: 9, end: 16 }, Sat: { start: 9, end: 12 }, Sun: null }
     }
   ];
+  const departmentList = ["Cardiology", "Pulmonology", "General Medicine", "Orthopedics", "Neurology", "Dermatology", "Pediatrics"];
   const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+  function formatHour(h) {
+    const period = h >= 12 ? "PM" : "AM";
+    let hr = h % 12; if (hr === 0) hr = 12;
+    return `${hr}:00 ${period}`;
+  }
+  function dayShiftLabel(dayHours) {
+    if (dayHours === null || dayHours === undefined) return "Off";
+    if (dayHours === "on-call") return "On-call";
+    return `${formatHour(dayHours.start)} – ${formatHour(dayHours.end)}`;
+  }
+  function generateSlots(dayHours, durationMinutes) {
+    durationMinutes = durationMinutes || 30;
+    if (!dayHours || dayHours === "on-call") return [];
+    const slots = [];
+    let cursor = dayHours.start * 60;
+    const end = dayHours.end * 60;
+    while (cursor + durationMinutes <= end) {
+      const startLabel = formatHour(Math.floor(cursor / 60)).replace(":00", cursor % 60 === 0 ? ":00" : `:${cursor % 60}`);
+      const next = cursor + durationMinutes;
+      const nextLabel = formatHour(Math.floor(next / 60)).replace(":00", next % 60 === 0 ? ":00" : `:${next % 60}`);
+      slots.push(`${startLabel} – ${nextLabel}`);
+      cursor = next;
+    }
+    return slots;
+  }
 
   function adminOverviewTab() {
     const total = patients.length;
@@ -1180,46 +1234,102 @@
   }
 
   function adminDoctorsTab() {
-    const byDoctor = {};
-    patients.forEach(p => { (byDoctor[p.assignedDoctor] = byDoctor[p.assignedDoctor] || []).push(p); });
+    if (doctorsDrill.view === "profile") return adminDoctorProfile(doctorsDrill.doctorName);
+    if (doctorsDrill.view === "doctorList") return adminDoctorList(doctorsDrill.department);
+    return adminDepartmentList();
+  }
 
-    const cards = doctorRoster.map(doc => {
-      const list = byDoctor[doc.name] || [];
-      const critCount = list.filter(p => p.status !== 'stable').length;
-      const rows = list.map(p => `
-        <tr>
-          <td class="mono">${p.id}</td><td>${p.name}</td><td>${p.bed}</td><td>${p.department}</td>
-          <td class="status-${p.status}"><span class="status-dot"></span><span class="status-label">${statusLabels[p.status]}</span></td>
-        </tr>
-      `).join("") || `<tr><td colspan="5" style="color:var(--ink-muted);">No patients currently assigned.</td></tr>`;
-
-      const scheduleRow = weekDays.map(d => `<td>${doc.schedule[d]}</td>`).join("");
-
+  function adminDepartmentList() {
+    const cards = departmentList.map(dept => {
+      const docsInDept = doctorRoster.filter(d => d.department === dept);
+      const patientCount = patients.filter(p => docsInDept.some(d => d.name === p.assignedDoctor)).length;
       return `
-        <div class="admin-section" style="margin-bottom:32px;">
-          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">
-            <div><div style="font-weight:500;font-size:16px;">${doc.name}</div><div style="font-size:12px;color:var(--ink-muted);">${doc.specialty}</div></div>
-            <div style="font-size:12px;color:var(--ink-muted);">${list.length} patient${list.length === 1 ? '' : 's'}${critCount ? ` · ${critCount} need attention` : ''} · backup: ${doctorBackup[doc.name] || '—'}</div>
-          </div>
-
-          <h4 class="section-label" style="margin-top:14px;">Assigned Patients</h4>
-          <table class="stock-table">
-            <thead><tr><th>Patient ID</th><th>Name</th><th>Bed</th><th>Department</th><th>Status</th></tr></thead>
-            <tbody>${rows}</tbody>
-          </table>
-
-          <h4 class="section-label" style="margin-top:16px;">Weekly Availability</h4>
-          <table class="stock-table">
-            <thead><tr>${weekDays.map(d => `<th>${d}</th>`).join("")}</tr></thead>
-            <tbody><tr>${scheduleRow}</tr></tbody>
-          </table>
+        <div class="staff-card" data-dept-select="${dept}" style="cursor:pointer;">
+          <div><div class="staff-name">${dept}</div><div class="staff-sub">${docsInDept.length} doctor${docsInDept.length === 1 ? '' : 's'} · ${patientCount} patient${patientCount === 1 ? '' : 's'} assigned</div></div>
+          <span style="color:var(--accent-ink);font-size:13px;">View →</span>
         </div>
       `;
     }).join("");
 
     return `
-      <div class="view-heading"><h2>Doctors</h2><div class="subtext">${doctorRoster.length} doctors on roster</div></div>
+      <div class="view-heading"><h2>Doctors — by Department</h2><div class="subtext">${departmentList.length} departments · ${doctorRoster.length} doctors on roster</div></div>
       ${cards}
+    `;
+  }
+
+  function adminDoctorList(department) {
+    const docs = doctorRoster.filter(d => d.department === department);
+    const byDoctor = {};
+    patients.forEach(p => { (byDoctor[p.assignedDoctor] = byDoctor[p.assignedDoctor] || []).push(p); });
+
+    const cards = docs.map(doc => {
+      const list = byDoctor[doc.name] || [];
+      return `
+        <div class="staff-card" data-doctor-profile="${doc.name}" style="cursor:pointer;">
+          <div>
+            <div class="staff-name">${doc.name}</div>
+            <div class="staff-sub">${doc.specialty} · Room ${doc.room}</div>
+          </div>
+          <div class="staff-actions">
+            <span class="avail-toggle ${doc.available ? 'avail' : 'unavail'}"><span class="dot"></span>${doc.available ? 'Available' : 'Unavailable'}</span>
+            <span style="font-size:12px;color:var(--ink-muted);">${list.length} patient${list.length === 1 ? '' : 's'}</span>
+            <span style="color:var(--accent-ink);font-size:13px;">View →</span>
+          </div>
+        </div>
+      `;
+    }).join("") || `<div class="no-alerts">No doctors currently listed in this department.</div>`;
+
+    return `
+      <button class="back-link" data-doctors-back="departments">← All Departments</button>
+      <div class="view-heading"><h2>${department}</h2><div class="subtext">${docs.length} doctor${docs.length === 1 ? '' : 's'} in this department</div></div>
+      ${cards}
+    `;
+  }
+
+  function adminDoctorProfile(doctorName) {
+    const doc = doctorRoster.find(d => d.name === doctorName);
+    const assigned = patients.filter(p => p.assignedDoctor === doctorName);
+    const critCount = assigned.filter(p => p.status !== 'stable').length;
+
+    const patientRows = assigned.map(p => `
+      <tr>
+        <td class="mono">${p.id}</td><td>${p.name}</td><td>${p.bed}</td><td>${p.department}</td>
+        <td class="status-${p.status}"><span class="status-dot"></span><span class="status-label">${statusLabels[p.status]}</span></td>
+      </tr>
+    `).join("") || `<tr><td colspan="5" style="color:var(--ink-muted);">No patients currently assigned.</td></tr>`;
+
+    const scheduleRows = weekDays.map(d => {
+      const dayHours = doc.hours[d];
+      const slots = generateSlots(dayHours, 30);
+      return `
+        <tr>
+          <td style="font-weight:500;width:60px;">${d}</td>
+          <td>${dayShiftLabel(dayHours)}</td>
+          <td style="color:var(--ink-muted);font-size:12px;">${slots.length ? slots.join(" · ") : "—"}</td>
+        </tr>
+      `;
+    }).join("");
+
+    return `
+      <button class="back-link" data-doctors-back="doctorList" data-dept="${doc.department}">← ${doc.department}</button>
+      <div class="admin-section">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+          <div><h2 style="font-size:20px;">${doc.name}</h2><div class="subtext">${doc.specialty} · ${doc.department} · Room ${doc.room}</div></div>
+          <div style="font-size:12px;color:var(--ink-muted);text-align:right;">${assigned.length} patient${assigned.length === 1 ? '' : 's'}${critCount ? ` · ${critCount} need attention` : ''}<br>backup: ${doctorBackup[doc.name] || '—'}</div>
+        </div>
+
+        <h4 class="section-label" style="margin-top:18px;">Weekly Schedule & Time Slots</h4>
+        <table class="stock-table">
+          <thead><tr><th>Day</th><th>Shift</th><th>Available Slots (30 min)</th></tr></thead>
+          <tbody>${scheduleRows}</tbody>
+        </table>
+
+        <h4 class="section-label" style="margin-top:20px;">Assigned Patients</h4>
+        <table class="stock-table">
+          <thead><tr><th>Patient ID</th><th>Name</th><th>Bed</th><th>Department</th><th>Status</th></tr></thead>
+          <tbody>${patientRows}</tbody>
+        </table>
+      </div>
     `;
   }
 
@@ -1259,6 +1369,30 @@
     if (adminSubTab === "doctors") return adminDoctorsTab();
     if (adminSubTab === "patients") return adminPatientsTab();
     return adminOverviewTab();
+  }
+
+  function attachAdminHandlers() {
+    document.querySelectorAll("[data-dept-select]").forEach(el => {
+      el.addEventListener("click", () => {
+        doctorsDrill = { view: "doctorList", department: el.dataset.deptSelect, doctorName: null };
+        renderMain();
+      });
+    });
+    document.querySelectorAll("[data-doctor-profile]").forEach(el => {
+      el.addEventListener("click", () => {
+        doctorsDrill.view = "profile";
+        doctorsDrill.doctorName = el.dataset.doctorProfile;
+        renderMain();
+      });
+    });
+    document.querySelectorAll("[data-doctors-back]").forEach(el => {
+      el.addEventListener("click", () => {
+        const target = el.dataset.doctorsBack;
+        if (target === "departments") doctorsDrill = { view: "departments", department: null, doctorName: null };
+        else if (target === "doctorList") doctorsDrill = { view: "doctorList", department: el.dataset.dept, doctorName: null };
+        renderMain();
+      });
+    });
   }
 
   // ---- Patient Portal ----
@@ -1431,6 +1565,7 @@
       attachPharmacyHandlers();
     } else if (currentRole === "admin") {
       main.innerHTML = adminView();
+      attachAdminHandlers();
     } else if (currentRole === "patient") {
       viewingPatientId = loggedInUser.name;
       main.innerHTML = patientPortalView();
