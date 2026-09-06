@@ -539,7 +539,9 @@
     "Dr. Iyer": "Dr. Menon", "Dr. Menon": "Dr. Iyer",
     "Dr. Rao": "Dr. Kapoor", "Dr. Kapoor": "Dr. Rao",
     "Dr. Nair": "Dr. Bhatt", "Dr. Bhatt": "Dr. Nair",
-    "Dr. Sen": "Dr. Menon"
+    "Dr. Sen": "Dr. Menon",
+    "Dr. Shetty": "Dr. Malhotra", "Dr. Malhotra": "Dr. Shetty",
+    "Dr. Chawla": "Dr. Joshi", "Dr. Joshi": "Dr. Chawla"
   };
   const nurseBackup = { "Nurse Fernandes": "Nurse Ali", "Nurse Ali": "Nurse Fernandes" };
   const nurseRoster = [
@@ -1228,9 +1230,25 @@
     {
       name: "Dr. Sen", specialty: "Pediatrician", department: "Pediatrics", room: "220", available: true,
       hours: { Mon: { start: 9, end: 16 }, Tue: { start: 9, end: 16 }, Wed: { start: 9, end: 16 }, Thu: null, Fri: { start: 9, end: 16 }, Sat: { start: 9, end: 12 }, Sun: null }
+    },
+    {
+      name: "Dr. Shetty", specialty: "ENT Specialist", department: "ENT", room: "130", available: true,
+      hours: { Mon: { start: 10, end: 16 }, Tue: { start: 10, end: 16 }, Wed: { start: 10, end: 16 }, Thu: { start: 10, end: 16 }, Fri: null, Sat: { start: 9, end: 12 }, Sun: null }
+    },
+    {
+      name: "Dr. Malhotra", specialty: "Gynecologist", department: "Gynecology", room: "140", available: true,
+      hours: { Mon: { start: 9, end: 15 }, Tue: null, Wed: { start: 9, end: 15 }, Thu: { start: 9, end: 15 }, Fri: { start: 9, end: 15 }, Sat: { start: 9, end: 13 }, Sun: null }
+    },
+    {
+      name: "Dr. Chawla", specialty: "Oncologist", department: "Oncology", room: "150", available: true,
+      hours: { Mon: { start: 11, end: 17 }, Tue: { start: 11, end: 17 }, Wed: null, Thu: { start: 11, end: 17 }, Fri: { start: 11, end: 17 }, Sat: null, Sun: "on-call" }
+    },
+    {
+      name: "Dr. Joshi", specialty: "General Surgeon", department: "Other Departments", room: "160", available: true,
+      hours: { Mon: { start: 9, end: 17 }, Tue: { start: 9, end: 17 }, Wed: { start: 9, end: 17 }, Thu: { start: 9, end: 17 }, Fri: null, Sat: null, Sun: null }
     }
   ];
-  const departmentList = ["Cardiology", "Pulmonology", "General Medicine", "Orthopedics", "Neurology", "Dermatology", "Pediatrics"];
+  const departmentList = ["Cardiology", "Pulmonology", "General Medicine", "Orthopedics", "Neurology", "Dermatology", "Pediatrics", "ENT", "Gynecology", "Oncology", "Other Departments"];
   const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   function formatHour(h) {
@@ -1337,6 +1355,7 @@
 
   function adminDoctorsTab() {
     if (doctorsDrill.view === "profile") return adminDoctorProfile(doctorsDrill.doctorName);
+    if (doctorsDrill.view === "timetable") return adminDoctorTimetable(doctorsDrill.department);
     if (doctorsDrill.view === "doctorList") return adminDoctorList(doctorsDrill.department);
     return adminDepartmentList();
   }
@@ -1383,8 +1402,32 @@
 
     return `
       <button class="back-link" data-doctors-back="departments">← All Departments</button>
-      <div class="view-heading"><h2>${department}</h2><div class="subtext">${docs.length} doctor${docs.length === 1 ? '' : 's'} in this department</div></div>
+      <div class="view-heading">
+        <h2>${department}</h2>
+        <button class="secondary-btn" data-view-timetable="${department}">View Timetable</button>
+      </div>
+      <div class="subtext" style="margin:-14px 0 16px;">${docs.length} doctor${docs.length === 1 ? '' : 's'} in this department</div>
       ${cards}
+    `;
+  }
+
+  function adminDoctorTimetable(department) {
+    const docs = doctorRoster.filter(d => d.department === department);
+    const rows = docs.map(doc => `
+      <tr>
+        <td style="font-weight:500;">${doc.name}</td>
+        ${weekDays.map(d => `<td style="font-size:12px;">${dayShiftLabel(doc.hours[d])}</td>`).join("")}
+      </tr>
+    `).join("") || `<tr><td colspan="8" style="color:var(--ink-muted);">No doctors in this department.</td></tr>`;
+
+    return `
+      <button class="back-link" data-doctors-back="doctorList" data-dept="${department}">← ${department}</button>
+      <div class="view-heading"><h2>${department} — Timetable</h2><div class="subtext">All doctors in this department, side by side</div></div>
+      <table class="stock-table">
+        <thead><tr><th>Doctor</th>${weekDays.map(d => `<th>${d}</th>`).join("")}</tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div style="font-size:11px;color:var(--ink-muted);margin-top:10px;">Appointments are booked in 30-minute slots within each listed shift.</div>
     `;
   }
 
@@ -1400,18 +1443,6 @@
       </tr>
     `).join("") || `<tr><td colspan="5" style="color:var(--ink-muted);">No patients currently assigned.</td></tr>`;
 
-    const scheduleRows = weekDays.map(d => {
-      const dayHours = doc.hours[d];
-      const slots = generateSlots(dayHours, 30);
-      return `
-        <tr>
-          <td style="font-weight:500;width:60px;">${d}</td>
-          <td>${dayShiftLabel(dayHours)}</td>
-          <td style="color:var(--ink-muted);font-size:12px;">${slots.length ? slots.join(" · ") : "—"}</td>
-        </tr>
-      `;
-    }).join("");
-
     return `
       <button class="back-link" data-doctors-back="doctorList" data-dept="${doc.department}">← ${doc.department}</button>
       <div class="admin-section">
@@ -1420,17 +1451,13 @@
           <div style="font-size:12px;color:var(--ink-muted);text-align:right;">${assigned.length} patient${assigned.length === 1 ? '' : 's'}${critCount ? ` · ${critCount} need attention` : ''}<br>backup: ${doctorBackup[doc.name] || '—'}</div>
         </div>
 
-        <h4 class="section-label" style="margin-top:18px;">Weekly Schedule & Time Slots</h4>
-        <table class="stock-table">
-          <thead><tr><th>Day</th><th>Shift</th><th>Available Slots (30 min)</th></tr></thead>
-          <tbody>${scheduleRows}</tbody>
-        </table>
-
         <h4 class="section-label" style="margin-top:20px;">Assigned Patients</h4>
         <table class="stock-table">
           <thead><tr><th>Patient ID</th><th>Name</th><th>Bed</th><th>Department</th><th>Status</th></tr></thead>
           <tbody>${patientRows}</tbody>
         </table>
+
+        <button class="back-link" data-view-timetable="${doc.department}" style="margin-top:16px;">View ${doc.department} timetable →</button>
       </div>
     `;
   }
@@ -1609,6 +1636,12 @@
       el.addEventListener("click", () => {
         doctorsDrill.view = "profile";
         doctorsDrill.doctorName = el.dataset.doctorProfile;
+        renderMain();
+      });
+    });
+    document.querySelectorAll("[data-view-timetable]").forEach(el => {
+      el.addEventListener("click", () => {
+        doctorsDrill = { view: "timetable", department: el.dataset.viewTimetable, doctorName: null };
         renderMain();
       });
     });
