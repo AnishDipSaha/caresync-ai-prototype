@@ -1062,7 +1062,7 @@
           <h2>Appointment booked</h2>
           <div class="login-sub">A confirmation record has been created.</div>
           <div class="confirmation-id">${bookingFlow.newPatientId}</div>
-          <div style="font-size:13px;color:var(--ink-muted);margin-bottom:24px;">Please note this Patient ID — you'll need it for check-in and to view your record.</div>
+          <div style="font-size:13px;color:var(--ink-muted);margin-bottom:24px;">Save this Patient ID — for check-in, and to find your record again later from the Patient login screen using "Find my record."</div>
           <div style="display:flex;gap:10px;justify-content:center;">
             <button class="primary-btn" id="bookLoginNow">View my record now</button>
             <button class="secondary-btn" id="bookDone">Back to sign in</button>
@@ -1219,7 +1219,15 @@
         <div class="login-wrap">
           <button class="back-link" id="loginBack">← Back</button>
           <h2>Patient Login</h2>
-          <div class="login-sub" style="margin-bottom:20px;">Select which patient's record to view.</div>
+          <div class="login-sub" style="margin-bottom:20px;">Booked an appointment? Look up your record with your Patient ID.</div>
+
+          <form id="patientIdLookupForm" style="display:flex;gap:8px;margin-bottom:6px;">
+            <input type="text" name="pid" placeholder="e.g. OP-3006 or CS-10245" style="flex:1;font-family:'IBM Plex Mono', monospace;font-size:13px;padding:9px 12px;border:1px solid var(--border);border-radius:2px;">
+            <button type="submit" class="primary-btn">Find my record</button>
+          </form>
+          <div id="patientIdLookupError" style="color:var(--critical);font-size:12px;margin-bottom:20px;"></div>
+
+          <h4 class="section-label">Or select an admitted patient</h4>
           <div class="patient-login-grid">${patientCards}</div>
         </div>
       `;
@@ -1227,6 +1235,15 @@
   }
 
   function attachLoginHandlers() {
+    const lookupForm = document.getElementById("patientIdLookupForm");
+    if (lookupForm) lookupForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = new FormData(lookupForm).get("pid").trim().toUpperCase();
+      const found = getPatient(id) || opdPatients.find(x => x.id === id);
+      if (found) { login("patient", id); }
+      else { document.getElementById("patientIdLookupError").textContent = "No record found for that ID. Check for typos and try again."; }
+    });
+
     const startBookBtn = document.getElementById("startBooking");
     if (startBookBtn) startBookBtn.addEventListener("click", startBooking);
 
