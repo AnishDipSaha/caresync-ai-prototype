@@ -399,6 +399,28 @@
       admissionDate: "2026-09-02", expectedDischargeDate: "2026-09-08",
       diagnosis: "Acute decompensated heart failure", treatmentPlan: "IV diuretics, fluid restriction, daily weight monitoring",
       procedures: [{ name: "ECG", date: "2026-09-02" }, { name: "Echocardiogram", date: "2026-09-03" }],
+      labReports: [
+        {
+          test: "Echocardiogram", date: "2026-09-03", reportedBy: "Dr. Varma (Cardiology)",
+          findings: [
+            { label: "Ejection Fraction", value: "38", unit: "%", range: "55–70", flag: "low" },
+            { label: "Left Ventricle", value: "Dilated", unit: "", range: "Normal", flag: "abnormal" },
+            { label: "Valve Function", value: "Mild mitral regurgitation", unit: "", range: "Normal", flag: "abnormal" }
+          ],
+          writtenReport: "Study demonstrates a dilated left ventricle with globally reduced systolic function. Ejection fraction is estimated at 38%, consistent with moderate systolic dysfunction. Mild mitral regurgitation is noted. No pericardial effusion. Findings are consistent with the clinical picture of decompensated heart failure.",
+          impression: "Moderate left ventricular systolic dysfunction with mild mitral regurgitation."
+        },
+        {
+          test: "Cardiac Enzyme Panel", date: "2026-09-02", reportedBy: "Central Lab",
+          findings: [
+            { label: "Troponin I", value: "0.04", unit: "ng/mL", range: "<0.04", flag: "normal" },
+            { label: "BNP", value: "820", unit: "pg/mL", range: "<100", flag: "high" },
+            { label: "CK-MB", value: "3.1", unit: "ng/mL", range: "0–5", flag: "normal" }
+          ],
+          writtenReport: "Troponin I is within normal limits, making acute myocardial infarction unlikely at time of sampling. BNP is markedly elevated at 820 pg/mL, supporting a diagnosis of volume overload and cardiac failure. CK-MB is unremarkable.",
+          impression: "Markedly elevated BNP consistent with heart failure. No biochemical evidence of acute infarction."
+        }
+      ],
       doctorNotes: [{ date: "2026-09-05", author: "Dr. Iyer", note: "Patient remains volume overloaded, continue diuresis, monitor renal function." }],
       nursingNotes: [{ date: "2026-09-05", author: "Nurse Fernandes", note: "Patient reports mild dyspnea on exertion, oxygen saturation monitored closely." }],
       dischargeSummary: null,
@@ -417,6 +439,19 @@
       admissionDate: "2026-09-04", expectedDischargeDate: "2026-09-06",
       diagnosis: "Viral fever", treatmentPlan: "Symptomatic management, hydration, antipyretics",
       procedures: [{ name: "Blood Panel", date: "2026-09-04" }],
+      labReports: [
+        {
+          test: "Complete Blood Panel", date: "2026-09-04", reportedBy: "Central Lab",
+          findings: [
+            { label: "WBC Count", value: "4.2", unit: "×10⁹/L", range: "4.0–11.0", flag: "normal" },
+            { label: "Hemoglobin", value: "13.8", unit: "g/dL", range: "13.0–17.0", flag: "normal" },
+            { label: "Platelets", value: "142", unit: "×10⁹/L", range: "150–400", flag: "low" },
+            { label: "CRP", value: "18", unit: "mg/L", range: "<5", flag: "high" }
+          ],
+          writtenReport: "White cell count is within normal limits with a relative lymphocytosis on differential. Mild thrombocytopenia is noted at 142 ×10⁹/L. CRP is mildly elevated at 18 mg/L. The overall pattern is more suggestive of a viral than bacterial process.",
+          impression: "Mild thrombocytopenia with modest CRP elevation — pattern consistent with viral illness."
+        }
+      ],
       doctorNotes: [{ date: "2026-09-05", author: "Dr. Menon", note: "Fever trending down, continue current management." }],
       nursingNotes: [{ date: "2026-09-05", author: "Nurse Fernandes", note: "Patient comfortable, tolerating oral intake well." }],
       dischargeSummary: null,
@@ -432,6 +467,30 @@
       admissionDate: "2026-09-03", expectedDischargeDate: "2026-09-09",
       diagnosis: "Community-acquired pneumonia", treatmentPlan: "IV antibiotics, nebulization, oxygen support as needed",
       procedures: [{ name: "Chest X-ray", date: "2026-09-03" }, { name: "Sputum Culture", date: "2026-09-04" }],
+      labReports: [
+        {
+          test: "Chest X-ray (PA view)", date: "2026-09-03", reportedBy: "Dr. Menezes (Radiology)",
+          findings: [
+            { label: "Right Lower Lobe", value: "Consolidation present", unit: "", range: "Clear", flag: "abnormal" },
+            { label: "Left Lung", value: "Clear", unit: "", range: "Clear", flag: "normal" },
+            { label: "Pleural Space", value: "Small effusion, right", unit: "", range: "No effusion", flag: "abnormal" },
+            { label: "Cardiac Silhouette", value: "Normal", unit: "", range: "Normal", flag: "normal" }
+          ],
+          writtenReport: "There is patchy airspace consolidation in the right lower lobe with associated small right pleural effusion. The left lung field is clear. Cardiac silhouette and mediastinal contours are within normal limits. No pneumothorax. Appearances are consistent with right lower lobe pneumonia.",
+          impression: "Right lower lobe pneumonia with small associated pleural effusion."
+        },
+        {
+          test: "Sputum Culture & Sensitivity", date: "2026-09-04", reportedBy: "Microbiology Lab",
+          findings: [
+            { label: "Organism", value: "Streptococcus pneumoniae", unit: "", range: "No growth", flag: "abnormal" },
+            { label: "Colony Count", value: "Moderate growth", unit: "", range: "No growth", flag: "abnormal" },
+            { label: "Azithromycin", value: "Sensitive", unit: "", range: "—", flag: "normal" },
+            { label: "Penicillin", value: "Sensitive", unit: "", range: "—", flag: "normal" }
+          ],
+          writtenReport: "Moderate growth of Streptococcus pneumoniae isolated on culture. Sensitivity testing shows the organism is sensitive to azithromycin and penicillin, and resistant to none of the agents tested. Current empirical therapy is appropriate.",
+          impression: "Streptococcus pneumoniae isolated, sensitive to current antibiotic therapy."
+        }
+      ],
       doctorNotes: [{ date: "2026-09-05", author: "Dr. Iyer", note: "Mild improvement in oxygenation, continue antibiotics, reassess in 48 hours." }],
       nursingNotes: [{ date: "2026-09-05", author: "Nurse Ali", note: "Patient using inhaler as prescribed, respiratory rate stable." }],
       dischargeSummary: null,
@@ -450,6 +509,19 @@
       admissionDate: "2026-09-05", expectedDischargeDate: "2026-09-06",
       diagnosis: "Post-fall soft tissue injury, right ankle", treatmentPlan: "Rest, ice, compression, elevation; pain management",
       procedures: [{ name: "X-ray — Ankle", date: "2026-09-05" }],
+      labReports: [
+        {
+          test: "X-ray — Right Ankle", date: "2026-09-05", reportedBy: "Dr. Menezes (Radiology)",
+          findings: [
+            { label: "Bony Alignment", value: "Normal", unit: "", range: "Normal", flag: "normal" },
+            { label: "Fracture", value: "None identified", unit: "", range: "None", flag: "normal" },
+            { label: "Soft Tissue", value: "Lateral swelling", unit: "", range: "Normal", flag: "abnormal" },
+            { label: "Joint Space", value: "Preserved", unit: "", range: "Preserved", flag: "normal" }
+          ],
+          writtenReport: "No acute fracture or dislocation is identified. Bony alignment and joint spaces are preserved. There is soft tissue swelling over the lateral malleolus consistent with the reported mechanism of injury. No radio-opaque foreign body seen.",
+          impression: "No fracture. Soft tissue injury over lateral malleolus."
+        }
+      ],
       doctorNotes: [{ date: "2026-09-05", author: "Dr. Menon", note: "No fracture seen on imaging, conservative management advised." }],
       nursingNotes: [{ date: "2026-09-05", author: "Nurse Ali", note: "Ice pack applied, patient ambulating with assistance." }],
       dischargeSummary: null,
@@ -465,6 +537,29 @@
       admissionDate: "2026-09-03", expectedDischargeDate: "2026-09-07",
       diagnosis: "Unstable angina", treatmentPlan: "Antiplatelet therapy, statin, cardiology monitoring",
       procedures: [{ name: "ECG", date: "2026-09-03" }, { name: "Echocardiogram", date: "2026-09-04" }],
+      labReports: [
+        {
+          test: "ECG (12-lead)", date: "2026-09-03", reportedBy: "Dr. Varma (Cardiology)",
+          findings: [
+            { label: "Rhythm", value: "Sinus", unit: "", range: "Sinus", flag: "normal" },
+            { label: "Rate", value: "101", unit: "bpm", range: "60–100", flag: "high" },
+            { label: "ST Segment", value: "Depression in V4–V6", unit: "", range: "Isoelectric", flag: "abnormal" },
+            { label: "Q Waves", value: "None", unit: "", range: "None", flag: "normal" }
+          ],
+          writtenReport: "Sinus rhythm at a rate of 101 bpm. There is ST segment depression of 1mm in leads V4 through V6, suggestive of lateral subendocardial ischemia. No pathological Q waves. QT interval is within normal limits. Recommend serial tracings and correlation with cardiac enzymes.",
+          impression: "ST depression in lateral leads suggestive of ischemia. Serial ECGs advised."
+        },
+        {
+          test: "Echocardiogram", date: "2026-09-04", reportedBy: "Dr. Varma (Cardiology)",
+          findings: [
+            { label: "Ejection Fraction", value: "52", unit: "%", range: "55–70", flag: "low" },
+            { label: "Wall Motion", value: "Mild lateral hypokinesia", unit: "", range: "Normal", flag: "abnormal" },
+            { label: "Valve Function", value: "Normal", unit: "", range: "Normal", flag: "normal" }
+          ],
+          writtenReport: "Ejection fraction is mildly reduced at 52%. There is mild hypokinesia of the lateral wall, correlating with the ECG findings. Valvular structures appear normal with no significant regurgitation or stenosis. No pericardial effusion.",
+          impression: "Mildly reduced EF with lateral wall hypokinesia, correlating with ECG changes."
+        }
+      ],
       doctorNotes: [{ date: "2026-09-05", author: "Dr. Iyer", note: "Chest pain resolved, continue medical management, monitor for recurrence." }],
       nursingNotes: [{ date: "2026-09-05", author: "Nurse Fernandes", note: "No further chest pain episodes overnight, vitals stable." }],
       dischargeSummary: null,
@@ -480,6 +575,19 @@
       admissionDate: "2026-09-05", expectedDischargeDate: "2026-09-06",
       diagnosis: "Dehydration, gastroenteritis", treatmentPlan: "IV fluids, electrolyte correction",
       procedures: [{ name: "Blood Panel", date: "2026-09-05" }],
+      labReports: [
+        {
+          test: "Electrolyte & Renal Panel", date: "2026-09-05", reportedBy: "Central Lab",
+          findings: [
+            { label: "Sodium", value: "132", unit: "mmol/L", range: "135–145", flag: "low" },
+            { label: "Potassium", value: "3.2", unit: "mmol/L", range: "3.5–5.0", flag: "low" },
+            { label: "Creatinine", value: "1.3", unit: "mg/dL", range: "0.7–1.2", flag: "high" },
+            { label: "Urea", value: "42", unit: "mg/dL", range: "15–40", flag: "high" }
+          ],
+          writtenReport: "Mild hyponatremia and hypokalemia are present, with sodium at 132 mmol/L and potassium at 3.2 mmol/L. Creatinine and urea are mildly elevated, consistent with pre-renal changes secondary to volume depletion. The overall picture is typical of dehydration following gastrointestinal fluid losses.",
+          impression: "Mild electrolyte derangement and pre-renal azotemia secondary to dehydration."
+        }
+      ],
       doctorNotes: [{ date: "2026-09-05", author: "Dr. Menon", note: "Improving with IV hydration, tolerating oral fluids before discharge." }],
       nursingNotes: [{ date: "2026-09-05", author: "Nurse Ali", note: "Patient tolerating small sips of water, no vomiting since admission." }],
       dischargeSummary: null,
@@ -495,6 +603,18 @@
       visitHistory: [{ date: "2026-08-20", reason: "Skin rash" }, { date: "2026-09-01", reason: "Follow-up review" }],
       diagnosis: "Contact dermatitis",
       medicalReports: ["Skin biopsy report"],
+      labReports: [
+        {
+          test: "Skin Biopsy — Histopathology", date: "2026-08-22", reportedBy: "Dr. Pinto (Pathology)",
+          findings: [
+            { label: "Epidermis", value: "Spongiosis present", unit: "", range: "Normal", flag: "abnormal" },
+            { label: "Dermal Infiltrate", value: "Perivascular lymphocytic", unit: "", range: "None", flag: "abnormal" },
+            { label: "Malignancy", value: "Not identified", unit: "", range: "None", flag: "normal" }
+          ],
+          writtenReport: "Sections show epidermal spongiosis with a superficial perivascular lymphocytic infiltrate in the dermis. Eosinophils are noted within the infiltrate. There is no evidence of malignancy or granulomatous inflammation. The histological pattern is consistent with a spongiotic dermatitis, which in the appropriate clinical context supports contact dermatitis.",
+          impression: "Spongiotic dermatitis. No malignancy identified."
+        }
+      ],
       prescription: [{ medicine: "Cetirizine", dose: "10mg", timing: "Once daily" }, { medicine: "Hydrocortisone cream", dose: "1%", timing: "Twice daily, affected area" }],
       vitals: { bp: "118/76", spo2: 98, temp: 36.8, pulse: 74 },
       followUp: { date: "2026-09-15", note: "Review skin condition; continue medication if improving." }
@@ -504,6 +624,19 @@
       visitHistory: [{ date: "2026-08-28", reason: "Recurrent headaches" }],
       diagnosis: "Migraine without aura",
       medicalReports: ["MRI Brain — normal study"],
+      labReports: [
+        {
+          test: "MRI Brain (with contrast)", date: "2026-08-29", reportedBy: "Dr. Menezes (Radiology)",
+          findings: [
+            { label: "Brain Parenchyma", value: "Normal signal", unit: "", range: "Normal", flag: "normal" },
+            { label: "Mass Lesion", value: "None identified", unit: "", range: "None", flag: "normal" },
+            { label: "Ventricles", value: "Normal size", unit: "", range: "Normal", flag: "normal" },
+            { label: "Vascular Structures", value: "Patent", unit: "", range: "Patent", flag: "normal" }
+          ],
+          writtenReport: "The brain parenchyma demonstrates normal signal intensity throughout with no evidence of acute infarct, hemorrhage, or space-occupying lesion. Ventricular system is of normal size and configuration. No abnormal enhancement following contrast administration. Major intracranial vessels appear patent.",
+          impression: "Normal study. No structural cause identified for the reported headaches."
+        }
+      ],
       prescription: [{ medicine: "Sumatriptan", dose: "50mg", timing: "As needed for episodes" }, { medicine: "Propranolol", dose: "20mg", timing: "Twice daily" }],
       vitals: { bp: "128/82", spo2: 99, temp: 36.9, pulse: 78 },
       followUp: { date: "2026-09-20", note: "Assess headache frequency on prophylaxis." }
@@ -513,6 +646,18 @@
       visitHistory: [{ date: "2026-09-01", reason: "Lower back pain" }],
       diagnosis: "Lumbar muscle strain",
       medicalReports: ["Lumbar spine X-ray — no fracture"],
+      labReports: [
+        {
+          test: "X-ray — Lumbar Spine", date: "2026-09-01", reportedBy: "Dr. Menezes (Radiology)",
+          findings: [
+            { label: "Vertebral Alignment", value: "Normal", unit: "", range: "Normal", flag: "normal" },
+            { label: "Fracture", value: "None identified", unit: "", range: "None", flag: "normal" },
+            { label: "Disc Spaces", value: "Mild L4-L5 narrowing", unit: "", range: "Preserved", flag: "abnormal" }
+          ],
+          writtenReport: "Vertebral bodies are of normal height with preserved alignment. No acute fracture or spondylolisthesis is identified. There is mild disc space narrowing at the L4-L5 level, consistent with early degenerative change. Sacroiliac joints appear unremarkable.",
+          impression: "No acute bony injury. Mild L4-L5 degenerative disc change."
+        }
+      ],
       prescription: [{ medicine: "Naproxen", dose: "250mg", timing: "Twice daily with food" }],
       vitals: { bp: "122/80", spo2: 98, temp: 36.7, pulse: 72 },
       followUp: { date: "2026-09-10", note: "Physiotherapy referral if pain persists beyond one week." }
@@ -522,6 +667,18 @@
       visitHistory: [{ date: "2026-09-02", reason: "Fever and body ache" }],
       diagnosis: "Seasonal influenza",
       medicalReports: ["Rapid influenza test — positive"],
+      labReports: [
+        {
+          test: "Rapid Influenza Antigen Test", date: "2026-09-02", reportedBy: "Central Lab",
+          findings: [
+            { label: "Influenza A", value: "Positive", unit: "", range: "Negative", flag: "abnormal" },
+            { label: "Influenza B", value: "Negative", unit: "", range: "Negative", flag: "normal" },
+            { label: "Specimen", value: "Nasopharyngeal swab", unit: "", range: "—", flag: "normal" }
+          ],
+          writtenReport: "Rapid antigen testing on nasopharyngeal swab is positive for Influenza A and negative for Influenza B. In the setting of acute febrile illness, this supports a diagnosis of seasonal influenza A infection. Note that rapid antigen tests have reduced sensitivity; clinical correlation is advised.",
+          impression: "Positive for Influenza A. Consistent with seasonal influenza."
+        }
+      ],
       prescription: [{ medicine: "Oseltamivir", dose: "75mg", timing: "Twice daily for 5 days" }, { medicine: "Paracetamol", dose: "650mg", timing: "As needed for fever" }],
       vitals: { bp: "130/84", spo2: 96, temp: 38.4, pulse: 92 },
       followUp: { date: "2026-09-09", note: "Return if fever persists beyond 4 days or breathing difficulty develops." }
@@ -531,6 +688,19 @@
       visitHistory: [{ date: "2026-09-03", reason: "Routine vaccination visit" }],
       diagnosis: "Well-child visit — no acute illness",
       medicalReports: ["Growth chart updated"],
+      labReports: [
+        {
+          test: "Growth & Development Assessment", date: "2026-09-03", reportedBy: "Dr. Sen (Pediatrics)",
+          findings: [
+            { label: "Height Percentile", value: "58th", unit: "", range: "3rd–97th", flag: "normal" },
+            { label: "Weight Percentile", value: "52nd", unit: "", range: "3rd–97th", flag: "normal" },
+            { label: "BMI-for-age", value: "Normal", unit: "", range: "Normal", flag: "normal" },
+            { label: "Developmental Milestones", value: "Age appropriate", unit: "", range: "Age appropriate", flag: "normal" }
+          ],
+          writtenReport: "Height and weight both plot within normal percentile ranges for age and sex, tracking consistently along prior growth curves. BMI-for-age is within the healthy range. Developmental milestones are age appropriate on screening. Immunization schedule is up to date following today's visit.",
+          impression: "Normal growth and development. No concerns identified."
+        }
+      ],
       prescription: [],
       vitals: { bp: "100/64", spo2: 99, temp: 36.6, pulse: 96 },
       followUp: { date: "2026-12-03", note: "Next scheduled vaccination and growth check." }
@@ -761,6 +931,112 @@
     const worsening = lowerIsWorse ? diff < 0 : diff > 0;
     const verb = diff > 0 ? "risen" : "declined";
     return { text: `${label} has ${verb} from ${first}${unit} to ${last}${unit}`, worsening };
+  }
+
+  // ---- Lab report rendering & AI summarization ----
+  function flagStyle(flag) {
+    if (flag === "high" || flag === "abnormal") return "color:var(--critical);font-weight:500;";
+    if (flag === "low") return "color:var(--watch);font-weight:500;";
+    return "";
+  }
+  function flagLabel(flag) {
+    if (flag === "high") return " ↑";
+    if (flag === "low") return " ↓";
+    if (flag === "abnormal") return " ⚠";
+    return "";
+  }
+
+  function renderLabReports(reportList, patientKey) {
+    if (!reportList || !reportList.length) {
+      return `<div style="font-size:13px;color:var(--ink-muted);">No lab or imaging reports on file.</div>`;
+    }
+    return reportList.map((r, i) => {
+      const rows = r.findings.map(f => `
+        <tr>
+          <td>${f.label}</td>
+          <td class="mono" style="${flagStyle(f.flag)}">${f.value}${f.unit ? ' ' + f.unit : ''}${flagLabel(f.flag)}</td>
+          <td style="color:var(--ink-muted);font-size:12px;">${f.range}</td>
+        </tr>
+      `).join("");
+      const key = `${patientKey}::${i}`;
+      const sState = labSummaryState[key];
+      let aiPart = `<button class="secondary-btn" data-lab-summary="${key}" style="margin-top:10px;" ${sState && sState.loading ? 'disabled' : ''}>${sState && sState.loading ? 'Summarizing…' : '✦ AI Summary'}</button>`;
+      if (sState && sState.loading) {
+        aiPart += `<div class="ai-loading">Reading findings and written report…</div>`;
+      } else if (sState && sState.text) {
+        aiPart += `<div class="ai-summary-card" style="margin-top:10px;">
+          <div class="ai-label">✦ AI-generated summary</div>${sState.text}
+          <div class="ai-disclaimer">Generated from the reported findings. Does not replace the reporting clinician's written report or impression.</div>
+        </div>`;
+      }
+
+      return `
+        <div class="rx-request" style="margin-bottom:16px;">
+          <div class="rx-top">
+            <span class="med-line">${r.test}</span>
+            <span class="patient-line">${r.date} · ${r.reportedBy}</span>
+          </div>
+          <table class="stock-table" style="margin-top:4px;">
+            <thead><tr><th>Parameter</th><th>Result</th><th>Reference Range</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+          <h4 class="section-label" style="margin-top:14px;">Written Report</h4>
+          <div class="note-item">${r.writtenReport}</div>
+          <h4 class="section-label" style="margin-top:12px;">Impression</h4>
+          <div class="note-item" style="border-left:3px solid var(--accent-ink);"><b>${r.impression}</b></div>
+          ${aiPart}
+        </div>
+      `;
+    }).join("");
+  }
+
+  let labSummaryState = {};
+
+  function generateLabAISummary(report) {
+    const abnormal = report.findings.filter(f => f.flag !== "normal");
+    const parts = [];
+    parts.push(`${report.test} performed on ${report.date}.`);
+    if (abnormal.length) {
+      const described = abnormal.map(f => {
+        const dir = f.flag === "high" ? "above" : f.flag === "low" ? "below" : "outside";
+        return `${f.label} at ${f.value}${f.unit ? ' ' + f.unit : ''} (${dir} the reference range of ${f.range})`;
+      });
+      parts.push(`${abnormal.length} of ${report.findings.length} parameters fall outside normal limits: ${described.join("; ")}.`);
+    } else {
+      parts.push(`All ${report.findings.length} measured parameters fall within their reference ranges.`);
+    }
+    parts.push(`The reporting clinician's impression was: ${report.impression}`);
+    parts.push(`This summary restates recorded findings for quick review and is not an independent interpretation.`);
+    return parts.join(" ");
+  }
+
+  function requestLabSummary(key, report) {
+    labSummaryState[key] = { loading: true, text: null };
+    renderMain();
+    setTimeout(() => {
+      labSummaryState[key] = { loading: false, text: generateLabAISummary(report) };
+      renderMain();
+    }, 600);
+  }
+
+  function findLabReportByKey(key) {
+    const [patientKey, idxStr] = key.split("::");
+    const idx = parseInt(idxStr, 10);
+    const admitted = patients.find(p => p.id === patientKey);
+    if (admitted && admitted.labReports) return admitted.labReports[idx];
+    const opd = opdPatients.find(p => p.id === patientKey);
+    if (opd && opd.labReports) return opd.labReports[idx];
+    return null;
+  }
+
+  function attachLabSummaryHandlers() {
+    document.querySelectorAll("[data-lab-summary]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const key = btn.dataset.labSummary;
+        const report = findLabReportByKey(key);
+        if (report) requestLabSummary(key, report);
+      });
+    });
   }
 
   function generateAISummary(p) {
@@ -1133,6 +1409,7 @@
         visitHistory: [{ date: nextDateForWeekday(f.day), reason: f.reason }],
         diagnosis: "Pending consultation",
         medicalReports: [],
+        labReports: [],
         prescription: [],
         vitals: { bp: "—", spo2: "—", temp: "—", pulse: "—" },
         followUp: { date: nextDateForWeekday(f.day), note: `Scheduled appointment — ${f.slot} with ${f.doctorName}` }
@@ -1458,6 +1735,8 @@
             <div class="form-actions"><button type="submit" class="primary-btn">Add prescription</button></div>
           </form>
           <h4 class="section-label">Prescriptions</h4><div class="med-list">${medsList}</div>
+          <h4 class="section-label" style="margin-top:20px;">Lab & Medical Reports</h4>
+          <div>${renderLabReports(p.labReports, p.id)}</div>
         </div>
       </div>
     </div>`;
@@ -1809,7 +2088,8 @@
         <div style="margin-bottom:20px;">${visits}</div>
 
         <h4 class="section-label">Medical Reports</h4>
-        <div style="margin-bottom:20px;">${reports}</div>
+        <div style="margin-bottom:12px;">${reports}</div>
+        <div style="margin-bottom:20px;">${renderLabReports(p.labReports, p.id)}</div>
 
         <h4 class="section-label">Prescription</h4>
         <div class="med-list" style="margin-bottom:20px;">${rx}</div>
@@ -1864,6 +2144,9 @@
         <h4 class="section-label">Procedures / Treatments</h4>
         <div style="margin-bottom:20px;">${procedures}</div>
 
+        <h4 class="section-label">Lab & Medical Reports</h4>
+        <div style="margin-bottom:20px;">${renderLabReports(p.labReports, p.id)}</div>
+
         <h4 class="section-label">Doctor's Notes</h4>
         <div style="margin-bottom:20px;">${doctorNotes}</div>
 
@@ -1890,6 +2173,7 @@
   }
 
   function attachAdminHandlers() {
+    attachLabSummaryHandlers();
     document.querySelectorAll("[data-dept-select]").forEach(el => {
       el.addEventListener("click", () => {
         doctorsDrill = { view: "doctorList", department: el.dataset.deptSelect, doctorName: null };
@@ -1960,6 +2244,7 @@
         </div>
       </div>
       <div class="patient-section"><h4 class="section-label">Diagnosis</h4><div class="note-item">${p.diagnosis}</div></div>
+      <div class="patient-section"><h4 class="section-label">My Test Reports</h4>${renderLabReports(p.labReports, p.id)}</div>
       <div class="patient-section"><h4 class="section-label">My Medicines</h4><div class="med-list">${rx}</div></div>
     `;
   }
@@ -2147,6 +2432,7 @@
     } else if (currentRole === "patient") {
       viewingPatientId = loggedInUser.name;
       main.innerHTML = patientPortalView();
+      attachLabSummaryHandlers();
       const payBtn = document.getElementById("payBillBtn");
       if (payBtn) payBtn.addEventListener("click", () => payBill(viewingPatientId));
     }
@@ -2204,6 +2490,7 @@
   }
 
   function attachDoctorHandlers() {
+    attachLabSummaryHandlers();
     attachRowSelectHandlers();
     attachAckHandlers();
     const closeBtn = document.getElementById("closeDetail");
