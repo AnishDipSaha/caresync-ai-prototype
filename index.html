@@ -600,7 +600,10 @@
   const opdPatients = [
     {
       id: "OP-3001", name: "R. Pillai", age: 34, gender: "M", department: "Dermatology", assignedDoctor: "Dr. Bhatt",
-      visitHistory: [{ date: "2026-08-20", reason: "Skin rash" }, { date: "2026-09-01", reason: "Follow-up review" }],
+      visitHistory: [
+        { date: "2026-08-20", reason: "Itchy rash on forearms — skin biopsy taken, topical steroid started" },
+        { date: "2026-09-01", reason: "Follow-up — biopsy confirmed contact dermatitis, rash improving on treatment" }
+      ],
       diagnosis: "Contact dermatitis",
       medicalReports: ["Skin biopsy report"],
       labReports: [
@@ -621,7 +624,11 @@
     },
     {
       id: "OP-3002", name: "A. Khan", age: 55, gender: "M", department: "Neurology", assignedDoctor: "Dr. Nair",
-      visitHistory: [{ date: "2026-08-28", reason: "Recurrent headaches" }],
+      visitHistory: [
+        { date: "2026-06-14", reason: "First presentation — headaches 2–3 times weekly, prescribed analgesics" },
+        { date: "2026-07-19", reason: "No improvement on analgesics — MRI Brain ordered to exclude structural cause" },
+        { date: "2026-08-28", reason: "MRI normal — diagnosed migraine without aura, started on prophylaxis" }
+      ],
       diagnosis: "Migraine without aura",
       medicalReports: ["MRI Brain — normal study"],
       labReports: [
@@ -817,6 +824,7 @@
 
   let currentRole = "nurse";
   let selectedPatientId = null;
+  let selectedOpdId = null;
   let viewingPatientId = "CS-10250";
   let adminSubTab = "overview";
   let doctorsDrill = { view: "departments", department: null, doctorName: null };
@@ -1685,6 +1693,100 @@
     </div>`;
   }
 
+  function doctorOpdSection(list) {
+    if (!list.length) {
+      return `<div class="view-heading" style="margin-top:32px;"><h2>My OPD / Check-up Patients</h2></div>
+        <div class="no-alerts">No outpatient consultations assigned to you.</div>`;
+    }
+
+    const rows = list.map(p => {
+      const visitCount = p.visitHistory.length;
+      const lastVisit = p.visitHistory[visitCount - 1];
+      const isRepeat = visitCount > 1;
+      return `
+        <div class="staff-card" data-opd-select="${p.id}" style="cursor:pointer;${p.id === selectedOpdId ? 'border-left-color:var(--accent);background:var(--accent-soft);' : ''}">
+          <div>
+            <div class="staff-name">${p.name} <span class="mono" style="font-weight:400;font-size:12px;color:var(--ink-muted);">${p.id}</span></div>
+            <div class="staff-sub">${p.age} yrs · ${p.diagnosis} · last seen ${lastVisit.date}</div>
+          </div>
+          <div class="staff-actions">
+            ${isRepeat ? `<span class="tag-dispensed">Repeat visit · ${visitCount} visits</span>` : `<span class="tag-awaiting">First visit</span>`}
+            <span style="color:var(--accent-ink);font-size:13px;">${p.id === selectedOpdId ? 'Hide history' : 'View history →'}</span>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    let html = `
+      <div class="view-heading" style="margin-top:32px;">
+        <h2>My OPD / Check-up Patients</h2>
+        <div class="subtext">${list.length} outpatient${list.length === 1 ? '' : 's'} · click to view full history</div>
+      </div>
+      ${rows}
+    `;
+
+    if (selectedOpdId) {
+      const p = list.find(x => x.id === selectedOpdId);
+      if (p) html += doctorOpdHistoryPanel(p);
+    }
+    return html;
+  }
+
+  function doctorOpdHistoryPanel(p) {
+    const visits = [...p.visitHistory].reverse().map((v, i) => {
+      const isLatest = i === 0;
+      return `
+        <div class="note-item" style="${isLatest ? 'border-left:3px solid var(--accent-ink);' : ''}">
+          <div class="note-meta"><b>${v.date}</b>${isLatest ? ' · most recent' : ' · previous visit'}</div>
+          ${v.reason}
+        </div>
+      `;
+    }).join("");
+
+    const rx = p.prescription.length ? p.prescription.map(r => `
+      <div class="med-item"><div><div class="med-name">${r.medicine} <span style="color:var(--ink-muted);font-weight:400;">${r.dose}</span></div><div class="med-meta">${r.timing}</div></div></div>
+    `).join("") : `<div style="font-size:13px;color:var(--ink-muted);">No medication currently prescribed.</div>`;
+
+    return `
+      <div class="detail-panel">
+        <div class="detail-header">
+          <div>
+            <h3>${p.name} <span class="mono" style="font-size:13px;color:var(--ink-muted);">${p.id}</span></h3>
+            <div class="meta">${p.age} yrs · ${p.gender} · ${p.department} · ${p.visitHistory.length} recorded visit${p.visitHistory.length === 1 ? '' : 's'}</div>
+          </div>
+          <button class="close-btn" id="closeOpdDetail">Close ✕</button>
+        </div>
+        <div class="detail-body">
+          <div class="detail-col">
+            <h4 class="section-label">Visit History</h4>
+            <div style="margin-bottom:20px;">${visits}</div>
+
+            <h4 class="section-label">Current Diagnosis</h4>
+            <div class="note-item" style="margin-bottom:20px;">${p.diagnosis}</div>
+
+            <h4 class="section-label">Vitals (Last Visit)</h4>
+            <div class="vitals-grid">
+              <div class="vital-box"><div class="label">Blood Pressure</div><div class="value">${p.vitals.bp}</div></div>
+              <div class="vital-box"><div class="label">SpO2</div><div class="value">${p.vitals.spo2}${p.vitals.spo2 === '—' ? '' : '%'}</div></div>
+              <div class="vital-box"><div class="label">Temperature</div><div class="value">${p.vitals.temp}${p.vitals.temp === '—' ? '' : '°C'}</div></div>
+              <div class="vital-box"><div class="label">Pulse</div><div class="value">${p.vitals.pulse}${p.vitals.pulse === '—' ? '' : ' bpm'}</div></div>
+            </div>
+          </div>
+          <div class="detail-col">
+            <h4 class="section-label">Prescription</h4>
+            <div class="med-list" style="margin-bottom:20px;">${rx}</div>
+
+            <h4 class="section-label">Follow-up</h4>
+            <div class="note-item" style="margin-bottom:20px;"><div class="note-meta"><b>Next:</b> ${p.followUp.date}</div>${p.followUp.note}</div>
+
+            <h4 class="section-label">Test Reports</h4>
+            ${renderLabReports(p.labReports, p.id)}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   function doctorDetailPanel(p) {
     const spo2Vals = p.history.map(h => h.spo2);
     const hrVals = p.history.map(h => h.heartRate);
@@ -2414,12 +2516,14 @@
       const coveringFor = doctorRoster.filter(d => !d.available && doctorBackup[d.name] === myName).map(d => d.name);
       const coveragePatients = patients.filter(p => coveringFor.includes(p.assignedDoctor));
       const allowedIds = new Set([...myPatients, ...coveragePatients].map(p => p.id));
+      const myOpdPatients = opdPatients.filter(p => p.assignedDoctor === myName || coveringFor.includes(p.assignedDoctor));
 
       let html = "";
       if (coveringFor.length) html += `<div class="coverage-banner">⚠ Covering for ${coveringFor.join(", ")} (marked unavailable) — their patients and alerts are included below.</div>`;
-      html += alertsPanel("doctor", allowedIds) + attentionStrip(myPatients.concat(coveragePatients)) + patientTable(myPatients, "My Patients");
+      html += alertsPanel("doctor", allowedIds) + attentionStrip(myPatients.concat(coveragePatients)) + patientTable(myPatients, "My Admitted Patients");
       if (coveragePatients.length) html += patientTable(coveragePatients, `Covering — ${coveringFor.join(", ")}`);
       if (selectedPatientId) { const p = getPatient(selectedPatientId); if (p && allowedIds.has(p.id)) html += doctorDetailPanel(p); }
+      html += doctorOpdSection(myOpdPatients);
       main.innerHTML = html;
       attachDoctorHandlers();
 
@@ -2495,6 +2599,15 @@
     attachAckHandlers();
     const closeBtn = document.getElementById("closeDetail");
     if (closeBtn) closeBtn.addEventListener("click", () => { selectedPatientId = null; renderMain(); });
+
+    document.querySelectorAll("[data-opd-select]").forEach(el => {
+      el.addEventListener("click", () => {
+        selectedOpdId = el.dataset.opdSelect === selectedOpdId ? null : el.dataset.opdSelect;
+        renderMain();
+      });
+    });
+    const closeOpdBtn = document.getElementById("closeOpdDetail");
+    if (closeOpdBtn) closeOpdBtn.addEventListener("click", () => { selectedOpdId = null; renderMain(); });
 
     const genBtn = document.getElementById("genSummaryBtn");
     if (genBtn) genBtn.addEventListener("click", () => requestAISummary(selectedPatientId));
